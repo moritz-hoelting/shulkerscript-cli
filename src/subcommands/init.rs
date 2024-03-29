@@ -33,6 +33,9 @@ pub fn init(
         // Create the .gitignore file
         create_gitignore(path, verbose)?;
 
+        // Create the pack.png file
+        create_pack_png(path, verbose)?;
+
         // Create the src directory
         let src_path = path.join("src");
         create_dir(&src_path, verbose)?;
@@ -97,6 +100,18 @@ fn create_gitignore(path: &Path, verbose: bool) -> std::io::Result<()> {
         print_info(&format!(
             "Created .gitignore file at {}.",
             to_absolute_path(&gitignore)?
+        ));
+    }
+    Ok(())
+}
+
+fn create_pack_png(path: &Path, verbose: bool) -> std::io::Result<()> {
+    let pack_png = path.join("pack.png");
+    fs::write(&pack_png, include_bytes!("../../assets/default-icon.png"))?;
+    if verbose {
+        print_info(&format!(
+            "Created pack.png file at {}.",
+            to_absolute_path(&pack_png)?
         ));
     }
     Ok(())
