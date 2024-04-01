@@ -40,6 +40,9 @@ pub fn init(
         let src_path = path.join("src");
         create_dir(&src_path, verbose)?;
 
+        // Create the main.shu file
+        create_main_file(path, verbose)?;
+
         print_success("Project initialized successfully.");
 
         Ok(())
@@ -112,6 +115,18 @@ fn create_pack_png(path: &Path, verbose: bool) -> std::io::Result<()> {
         print_info(&format!(
             "Created pack.png file at {}.",
             to_absolute_path(&pack_png)?
+        ));
+    }
+    Ok(())
+}
+
+fn create_main_file(path: &Path, verbose: bool) -> std::io::Result<()> {
+    let main_file = path.join("src").join("main.shu");
+    fs::write(&main_file, include_str!("../../assets/default-main.shu"))?;
+    if verbose {
+        print_info(&format!(
+            "Created main.shu file at {}.",
+            to_absolute_path(&main_file)?
         ));
     }
     Ok(())
