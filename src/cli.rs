@@ -1,6 +1,7 @@
-use std::path::PathBuf;
-
-use crate::{error::Result, subcommands};
+use crate::{
+    error::Result,
+    subcommands::{self, CompileArgs, InitArgs},
+};
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
@@ -15,43 +16,27 @@ pub struct Args {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum Command {
-    /// Initialize a new project in the current directory.
-    Init {
-        /// The path of the folder to initialize in.
-        #[clap(default_value = ".")]
-        path: PathBuf,
-        /// The name of the project.
-        #[clap(short, long)]
-        name: Option<String>,
-        /// The description of the project.
-        #[clap(short, long)]
-        description: Option<String>,
-        /// The pack format version.
-        #[clap(short, long)]
-        pack_format: Option<u8>,
-        /// Force initialization even if the directory is not empty.
-        #[clap(short, long)]
-        force: bool,
-    },
+    /// Initialize a new project.
+    Init(InitArgs),
+    /// Compile the project.
+    Compile(CompileArgs),
+    #[cfg(feature = "zip")]
+    /// Compile and package the project.
+    Package(subcommands::PackageArgs),
+    #[cfg(feature = "lang-debug")]
+    /// Compile the project and dump the intermediate state.
+    LangDebug(subcommands::LangDebugArgs),
 }
 
 impl Args {
     pub fn run(&self) -> Result<()> {
         match &self.cmd {
-            Command::Init {
-                path,
-                name,
-                description,
-                pack_format,
-                force,
-            } => subcommands::init(
-                self.verbose,
-                path,
-                name.as_deref(),
-                description.as_deref(),
-                *pack_format,
-                *force,
-            )?,
+            Command::Init(args) => subcommands::init(self.verbose, args)?,
+            Command::Compile(args) => subcommands::compile(self.verbose, args)?,
+            #[cfg(feature = "zip")]
+            Command::Package(args) => subcommands::package(self.verbose, args)?,
+            #[cfg(feature = "lang-debug")]
+            Command::LangDebug(args) => subcommands::lang_debug(args)?,
         }
 
         Ok(())

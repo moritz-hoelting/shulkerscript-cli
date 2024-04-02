@@ -14,6 +14,10 @@ pub enum Error {
     NonEmptyDirectoryError(PathBuf),
     #[error("An error occured because the path {0} is not a directory.")]
     NotDirectoryError(PathBuf),
+    #[error("An error occured because the path is neither a pack directory or a pack.toml file.")]
+    InvalidPackPathError(PathBuf),
+    #[error("An error occured while compiling the project.")]
+    ShulkerScriptError(#[from] shulkerscript_lang::base::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

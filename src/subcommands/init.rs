@@ -1,4 +1,7 @@
-use std::{fs, path::Path};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use crate::{
     config::ProjectConfig,
@@ -7,14 +10,32 @@ use crate::{
     util::to_absolute_path,
 };
 
-pub fn init(
-    verbose: bool,
-    path: &Path,
-    name: Option<&str>,
-    description: Option<&str>,
+#[derive(Debug, clap::Args, Clone)]
+pub struct InitArgs {
+    /// The path of the folder to initialize in.
+    #[clap(default_value = ".")]
+    path: PathBuf,
+    /// The name of the project.
+    #[clap(short, long)]
+    name: Option<String>,
+    /// The description of the project.
+    #[clap(short, long)]
+    description: Option<String>,
+    /// The pack format version.
+    #[clap(short, long)]
     pack_format: Option<u8>,
+    /// Force initialization even if the directory is not empty.
+    #[clap(short, long)]
     force: bool,
-) -> Result<()> {
+}
+
+pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
+    let path = args.path.as_path();
+    let name = args.name.as_deref();
+    let description = args.description.as_deref();
+    let pack_format = args.pack_format;
+    let force = args.force;
+
     if !path.exists() {
         print_error("The specified path does not exist.");
         Err(Error::PathNotFoundError(path.to_path_buf()))
