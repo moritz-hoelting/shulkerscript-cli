@@ -8,17 +8,17 @@ use std::{fs, path::PathBuf};
 use crate::util;
 
 #[derive(Debug, clap::Args, Clone)]
-pub struct CompileArgs {
-    /// The path of the project to compile.
+pub struct BuildArgs {
+    /// The path of the project to build.
     #[clap(default_value = ".")]
     path: PathBuf,
 }
 
-pub fn compile(_verbose: bool, args: &CompileArgs) -> Result<()> {
+pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
     let path = args.path.as_path();
 
     let str_path = util::to_absolute_path(path)?;
-    print_info(&format!("Compiling project at {}", str_path));
+    print_info(&format!("Building project at {}", str_path));
 
     let toml_path = if !path.exists() {
         print_error("The specified path does not exist.");
@@ -60,7 +60,7 @@ pub fn compile(_verbose: bool, args: &CompileArgs) -> Result<()> {
     compiled.place(&dist_path)?;
 
     print_info(&format!(
-        "Finished compiling project to {}",
+        "Finished building project to {}",
         util::to_absolute_path(&dist_path)?
     ));
 

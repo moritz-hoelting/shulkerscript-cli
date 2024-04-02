@@ -1,6 +1,6 @@
 use crate::{
     error::Result,
-    subcommands::{self, CompileArgs, InitArgs},
+    subcommands::{self, BuildArgs, InitArgs},
 };
 use clap::{Parser, Subcommand};
 
@@ -18,13 +18,13 @@ pub struct Args {
 pub enum Command {
     /// Initialize a new project.
     Init(InitArgs),
-    /// Compile the project.
-    Compile(CompileArgs),
+    /// Build the project.
+    Build(BuildArgs),
     #[cfg(feature = "zip")]
-    /// Compile and package the project.
+    /// Build and package the project.
     Package(subcommands::PackageArgs),
     #[cfg(feature = "lang-debug")]
-    /// Compile the project and dump the intermediate state.
+    /// Build the project and dump the intermediate state.
     LangDebug(subcommands::LangDebugArgs),
 }
 
@@ -32,7 +32,7 @@ impl Args {
     pub fn run(&self) -> Result<()> {
         match &self.cmd {
             Command::Init(args) => subcommands::init(self.verbose, args)?,
-            Command::Compile(args) => subcommands::compile(self.verbose, args)?,
+            Command::Build(args) => subcommands::build(self.verbose, args)?,
             #[cfg(feature = "zip")]
             Command::Package(args) => subcommands::package(self.verbose, args)?,
             #[cfg(feature = "lang-debug")]

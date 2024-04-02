@@ -1,8 +1,8 @@
 mod init;
 pub use init::{init, InitArgs};
 
-mod compile;
-pub use compile::{compile, CompileArgs};
+mod build;
+pub use build::{build, BuildArgs};
 
 #[cfg(feature = "zip")]
 mod package;
