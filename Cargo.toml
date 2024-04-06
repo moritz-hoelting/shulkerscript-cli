@@ -6,8 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-zip = ["shulkerbox/zip"]
+default = ["zip", "lua"]
 lang-debug = []
+lua = ["shulkerscript-lang/lua"]
+zip = ["shulkerbox/zip"]
 
 [dependencies]
 clap = { version = "4.5.4", features = ["derive"] }
@@ -15,6 +17,6 @@ colored = "2.1.0"
 serde = { version = "1.0.197", features = ["derive"] }
 thiserror = "1.0.58"
 toml = "0.8.12"
-shulkerscript-lang = {path = "../shulkerscript-lang"}
+shulkerscript-lang = {path = "../shulkerscript-lang", features = ["shulkerbox"], default-features = false}
 shulkerbox = {path = "../shulkerbox", default-features = false}
 

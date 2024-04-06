@@ -1,15 +1,16 @@
 use crate::error::Result;
-use std::path::PathBuf;
+
+use super::BuildArgs;
 
 #[derive(Debug, clap::Args, Clone)]
 pub struct PackageArgs {
-    /// The path of the project to package.
-    #[clap(default_value = ".")]
-    path: PathBuf,
+    #[clap(flatten)]
+    build_args: BuildArgs,
 }
 
-pub fn package(_verbose: bool, _args: &PackageArgs) -> Result<()> {
+pub fn package(_verbose: bool, args: &PackageArgs) -> Result<()> {
     println!("PACKAGE");
+    println!("  - Args: {:?}", args);
 
     Ok(())
 }

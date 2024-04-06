@@ -1,5 +1,7 @@
+namespace "{namespace}";
+
 #[tick]
-fn main() {
+fn main() {{
     // Change this
     /say Hello World!
-}
+}}

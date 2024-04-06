@@ -31,7 +31,6 @@ pub struct InitArgs {
 
 pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
     let path = args.path.as_path();
-    let name = args.name.as_deref();
     let description = args.description.as_deref();
     let pack_format = args.pack_format;
     let force = args.force;
@@ -46,6 +45,11 @@ pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
         print_error("The specified directory is not empty.");
         Err(Error::NonEmptyDirectoryError(path.to_path_buf()))
     } else {
+        let name = args
+            .name
+            .as_deref()
+            .or_else(|| path.file_name().and_then(|os| os.to_str()));
+
         print_info("Initializing a new Shulkerscript project...");
 
         // Create the pack.toml file
@@ -62,7 +66,11 @@ pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
         create_dir(&src_path, verbose)?;
 
         // Create the main.shu file
-        create_main_file(path, verbose)?;
+        create_main_file(
+            path,
+            &name_to_namespace(name.unwrap_or("shulkerscript-pack")),
+            verbose,
+        )?;
 
         print_success("Project initialized successfully.");
 
@@ -77,14 +85,12 @@ fn create_pack_config(
     description: Option<&str>,
     pack_format: Option<u8>,
 ) -> Result<()> {
-    let pack_name = name.or_else(|| base_path.file_name().and_then(|os| os.to_str()));
-
     let path = base_path.join("pack.toml");
 
     // Load the default config
     let mut content = ProjectConfig::default();
     // Override the default values with the provided ones
-    if let Some(name) = pack_name {
+    if let Some(name) = name {
         content.pack.name = name.to_string();
     }
     if let Some(description) = description {
@@ -141,9 +147,15 @@ fn create_pack_png(path: &Path, verbose: bool) -> std::io::Result<()> {
     Ok(())
 }
 
-fn create_main_file(path: &Path, verbose: bool) -> std::io::Result<()> {
+fn create_main_file(path: &Path, namespace: &str, verbose: bool) -> std::io::Result<()> {
     let main_file = path.join("src").join("main.shu");
-    fs::write(&main_file, include_str!("../../assets/default-main.shu"))?;
+    fs::write(
+        &main_file,
+        format!(
+            include_str!("../../assets/default-main.shu"),
+            namespace = namespace
+        ),
+    )?;
     if verbose {
         print_info(&format!(
             "Created main.shu file at {}.",
@@ -151,4 +163,25 @@ fn create_main_file(path: &Path, verbose: bool) -> std::io::Result<()> {
         ));
     }
     Ok(())
+}
+
+fn name_to_namespace(name: &str) -> String {
+    const VALID_CHARS: &str = "0123456789abcdefghijklmnopqrstuvwxyz_-.";
+
+    name.to_lowercase()
+        .chars()
+        .filter_map(|c| {
+            if VALID_CHARS.contains(c) {
+                Some(c)
+            } else if c.is_ascii_uppercase() {
+                Some(c.to_ascii_lowercase())
+            } else if c.is_ascii_punctuation() {
+                Some('-')
+            } else if c.is_ascii_whitespace() {
+                Some('_')
+            } else {
+                None
+            }
+        })
+        .collect()
 }
