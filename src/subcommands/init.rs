@@ -3,6 +3,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use clap::ValueEnum;
+use git2::Repository;
+
 use crate::{
     config::ProjectConfig,
     error::{Error, Result},
@@ -27,6 +30,15 @@ pub struct InitArgs {
     /// Force initialization even if the directory is not empty.
     #[clap(short, long)]
     force: bool,
+    #[clap(long, default_value = "git")]
+    vcs: VersionControlSystem,
+}
+
+#[derive(Debug, Clone, Copy, Default, ValueEnum)]
+enum VersionControlSystem {
+    #[default]
+    Git,
+    None,
 }
 
 pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
@@ -71,6 +83,8 @@ pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
             &name_to_namespace(name.unwrap_or("shulkerscript-pack")),
             verbose,
         )?;
+
+        initalize_vcs(path, args.vcs, verbose)?;
 
         print_success("Project initialized successfully.");
 
@@ -163,6 +177,21 @@ fn create_main_file(path: &Path, namespace: &str, verbose: bool) -> std::io::Res
         ));
     }
     Ok(())
+}
+
+fn initalize_vcs(path: &Path, vcs: VersionControlSystem, verbose: bool) -> Result<()> {
+    match vcs {
+        VersionControlSystem::None => Ok(()),
+        VersionControlSystem::Git => {
+            if verbose {
+                print_info("Initializing a new Git repository...");
+            }
+            Repository::init(path)?;
+            print_info("Initialized a new Git repository.");
+
+            Ok(())
+        }
+    }
 }
 
 fn name_to_namespace(name: &str) -> String {

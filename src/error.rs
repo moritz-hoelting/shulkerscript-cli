@@ -18,6 +18,8 @@ pub enum Error {
     InvalidPackPathError(PathBuf),
     #[error("An error occured while compiling the project.")]
     ShulkerScriptError(#[from] shulkerscript_lang::base::Error),
+    #[error("An error occured during a git action.")]
+    GitError(#[from] git2::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
