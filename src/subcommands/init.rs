@@ -4,7 +4,9 @@ use std::{
 };
 
 use clap::ValueEnum;
-use git2::Repository;
+use git2::{
+    IndexAddOption as GitIndexAddOption, Repository as GitRepository, Signature as GitSignature,
+};
 
 use crate::{
     config::ProjectConfig,
@@ -67,9 +69,6 @@ pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
         // Create the pack.toml file
         create_pack_config(verbose, path, name, description, pack_format)?;
 
-        // Create the .gitignore file
-        create_gitignore(path, verbose)?;
-
         // Create the pack.png file
         create_pack_png(path, verbose)?;
 
@@ -84,6 +83,7 @@ pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
             verbose,
         )?;
 
+        // Initialize the version control system
         initalize_vcs(path, args.vcs, verbose)?;
 
         print_success("Project initialized successfully.");
@@ -186,7 +186,45 @@ fn initalize_vcs(path: &Path, vcs: VersionControlSystem, verbose: bool) -> Resul
             if verbose {
                 print_info("Initializing a new Git repository...");
             }
-            Repository::init(path)?;
+            // Initalize the Git repository
+            let repo = GitRepository::init(path)?;
+            repo.add_ignore_rule("/dist")?;
+
+            // Create the .gitignore file
+            create_gitignore(path, verbose)?;
+
+            // Create the initial commit
+            let mut index = repo.index()?;
+            let oid = index.write_tree()?;
+            let tree = repo.find_tree(oid)?;
+            let signature = repo
+                .signature()
+                .unwrap_or(GitSignature::now("Shulkerscript CLI", "cli@shulkerscript")?);
+            repo.commit(
+                Some("HEAD"),
+                &signature,
+                &signature,
+                "Inital commit",
+                &tree,
+                &[],
+            )?;
+
+            // Create the second commit with the template files
+            let mut index = repo.index()?;
+            index.add_all(["."].iter(), GitIndexAddOption::DEFAULT, None)?;
+            index.write()?;
+            let oid = index.write_tree()?;
+            let tree = repo.find_tree(oid)?;
+            let parent = repo.head()?.peel_to_commit()?;
+            repo.commit(
+                Some("HEAD"),
+                &signature,
+                &signature,
+                "Add template files",
+                &tree,
+                &[&parent],
+            )?;
+
             print_info("Initialized a new Git repository.");
 
             Ok(())
