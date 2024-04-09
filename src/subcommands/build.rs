@@ -1,11 +1,11 @@
+use path_absolutize::Absolutize;
+
 use crate::{
     config::ProjectConfig,
     error::{Error, Result},
     terminal_output::{print_error, print_info},
 };
 use std::{fs, path::PathBuf};
-
-use crate::util;
 
 #[derive(Debug, clap::Args, Clone)]
 pub struct BuildArgs {
@@ -17,8 +17,10 @@ pub struct BuildArgs {
 pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
     let path = args.path.as_path();
 
-    let str_path = util::to_absolute_path(path)?;
-    print_info(&format!("Building project at {}", str_path));
+    print_info(&format!(
+        "Building project at {}",
+        path.absolutize()?.display()
+    ));
 
     let toml_path = if !path.exists() {
         print_error("The specified path does not exist.");
@@ -61,7 +63,7 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
 
     print_info(&format!(
         "Finished building project to {}",
-        util::to_absolute_path(&dist_path)?
+        dist_path.absolutize_from(path)?.display()
     ));
 
     Ok(())

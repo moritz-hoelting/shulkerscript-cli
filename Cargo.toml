@@ -20,4 +20,5 @@ toml = "0.8.12"
 shulkerscript-lang = {path = "../shulkerscript-lang", features = ["shulkerbox"], default-features = false}
 shulkerbox = {path = "../shulkerbox", default-features = false}
 git2 = { version = "0.18.3", default-features = false }
+path-absolutize = "3.1.1"
 

@@ -7,12 +7,12 @@ use clap::ValueEnum;
 use git2::{
     IndexAddOption as GitIndexAddOption, Repository as GitRepository, Signature as GitSignature,
 };
+use path_absolutize::Absolutize;
 
 use crate::{
     config::ProjectConfig,
     error::{Error, Result},
     terminal_output::{print_error, print_info, print_success},
-    util::to_absolute_path,
 };
 
 #[derive(Debug, clap::Args, Clone)]
@@ -32,6 +32,7 @@ pub struct InitArgs {
     /// Force initialization even if the directory is not empty.
     #[clap(short, long)]
     force: bool,
+    /// The version control system to initialize.
     #[clap(long, default_value = "git")]
     vcs: VersionControlSystem,
 }
@@ -118,7 +119,7 @@ fn create_pack_config(
     if verbose {
         print_info(&format!(
             "Created pack.toml file at {}.",
-            to_absolute_path(&path)?
+            path.absolutize()?.display()
         ));
     }
     Ok(())
@@ -130,7 +131,7 @@ fn create_dir(path: &Path, verbose: bool) -> std::io::Result<()> {
         if verbose {
             print_info(&format!(
                 "Created directory at {}.",
-                to_absolute_path(path)?
+                path.absolutize()?.display()
             ));
         }
     }
@@ -143,7 +144,7 @@ fn create_gitignore(path: &Path, verbose: bool) -> std::io::Result<()> {
     if verbose {
         print_info(&format!(
             "Created .gitignore file at {}.",
-            to_absolute_path(&gitignore)?
+            gitignore.absolutize()?.display()
         ));
     }
     Ok(())
@@ -155,7 +156,7 @@ fn create_pack_png(path: &Path, verbose: bool) -> std::io::Result<()> {
     if verbose {
         print_info(&format!(
             "Created pack.png file at {}.",
-            to_absolute_path(&pack_png)?
+            pack_png.absolutize()?.display()
         ));
     }
     Ok(())
@@ -173,7 +174,7 @@ fn create_main_file(path: &Path, namespace: &str, verbose: bool) -> std::io::Res
     if verbose {
         print_info(&format!(
             "Created main.shu file at {}.",
-            to_absolute_path(&main_file)?
+            main_file.absolutize()?.display()
         ));
     }
     Ok(())
