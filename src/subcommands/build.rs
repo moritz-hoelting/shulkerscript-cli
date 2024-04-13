@@ -11,7 +11,7 @@ use std::{fs, path::PathBuf};
 pub struct BuildArgs {
     /// The path of the project to build.
     #[clap(default_value = ".")]
-    path: PathBuf,
+    pub path: PathBuf,
 }
 
 pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
