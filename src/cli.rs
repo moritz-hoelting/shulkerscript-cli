@@ -1,8 +1,6 @@
-use crate::{
-    error::Result,
-    subcommands::{self, BuildArgs, InitArgs},
-};
+use crate::subcommands::{self, BuildArgs, InitArgs};
 use clap::{Parser, Subcommand};
+use color_eyre::eyre::Result;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]

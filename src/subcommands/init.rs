@@ -4,6 +4,7 @@ use std::{
 };
 
 use clap::ValueEnum;
+use color_eyre::eyre::Result;
 use git2::{
     IndexAddOption as GitIndexAddOption, Repository as GitRepository, Signature as GitSignature,
 };
@@ -11,7 +12,7 @@ use path_absolutize::Absolutize;
 
 use crate::{
     config::ProjectConfig,
-    error::{Error, Result},
+    error::Error,
     terminal_output::{print_error, print_info, print_success},
 };
 
@@ -52,13 +53,13 @@ pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
 
     if !path.exists() {
         print_error("The specified path does not exist.");
-        Err(Error::PathNotFoundError(path.to_path_buf()))
+        Err(Error::PathNotFoundError(path.to_path_buf()))?
     } else if !path.is_dir() {
         print_error("The specified path is not a directory.");
-        Err(Error::NotDirectoryError(path.to_path_buf()))
+        Err(Error::NotDirectoryError(path.to_path_buf()))?
     } else if !force && path.read_dir()?.next().is_some() {
         print_error("The specified directory is not empty.");
-        Err(Error::NonEmptyDirectoryError(path.to_path_buf()))
+        Err(Error::NonEmptyDirectoryError(path.to_path_buf()))?
     } else {
         let name = args
             .name

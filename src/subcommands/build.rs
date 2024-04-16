@@ -1,8 +1,9 @@
+use color_eyre::eyre::Result;
 use path_absolutize::Absolutize;
 
 use crate::{
     config::ProjectConfig,
-    error::{Error, Result},
+    error::Error,
     terminal_output::{print_error, print_info},
 };
 use std::{fs, path::PathBuf};
@@ -24,12 +25,12 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
 
     let toml_path = if !path.exists() {
         print_error("The specified path does not exist.");
-        return Err(Error::PathNotFoundError(path.to_path_buf()));
+        return Err(Error::PathNotFoundError(path.to_path_buf()))?;
     } else if path.is_dir() {
         let toml_path = path.join("pack.toml");
         if !toml_path.exists() {
             print_error("The specified directory does not contain a pack.toml file.");
-            return Err(Error::InvalidPackPathError(path.to_path_buf()));
+            Err(Error::InvalidPackPathError(path.to_path_buf()))?;
         }
         toml_path
     } else if path.is_file()
@@ -41,7 +42,7 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
         path.to_path_buf()
     } else {
         print_error("The specified path is neither a directory nor a pack.toml file.");
-        return Err(Error::InvalidPackPathError(path.to_path_buf()));
+        return Err(Error::InvalidPackPathError(path.to_path_buf()))?;
     };
 
     let toml_content = fs::read_to_string(&toml_path)?;

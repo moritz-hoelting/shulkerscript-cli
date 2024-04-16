@@ -21,4 +21,5 @@ shulkerscript-lang = {path = "../shulkerscript-lang", features = ["shulkerbox"],
 shulkerbox = {path = "../shulkerbox", default-features = false}
 git2 = { version = "0.18.3", default-features = false }
 path-absolutize = "3.1.1"
+color-eyre = "0.6.3"
 

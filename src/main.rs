@@ -1,13 +1,12 @@
-use std::process::ExitCode;
-
 use clap::Parser;
+use color_eyre::eyre::Result;
 use shulkerscript::cli::Args;
 
-fn main() -> ExitCode {
+fn main() -> Result<()> {
+    color_eyre::install()?;
     let args = Args::parse();
 
-    match args.run() {
-        Ok(_) => ExitCode::SUCCESS,
-        Err(_) => ExitCode::FAILURE,
-    }
+    args.run()?;
+
+    Ok(())
 }
