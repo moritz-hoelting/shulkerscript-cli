@@ -4,6 +4,9 @@ pub use init::{init, InitArgs};
 mod build;
 pub use build::{build, BuildArgs};
 
+mod clean;
+pub use clean::{clean, CleanArgs};
+
 #[cfg(feature = "zip")]
 mod package;
 #[cfg(feature = "zip")]

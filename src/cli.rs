@@ -1,4 +1,4 @@
-use crate::subcommands::{self, BuildArgs, InitArgs};
+use crate::subcommands::{self, BuildArgs, CleanArgs, InitArgs};
 use clap::{Parser, Subcommand};
 use color_eyre::eyre::Result;
 
@@ -18,6 +18,9 @@ pub enum Command {
     Init(InitArgs),
     /// Build the project.
     Build(BuildArgs),
+    /// Clean build artifacts.
+    /// This will remove the `dist` directory.
+    Clean(CleanArgs),
     #[cfg(feature = "zip")]
     /// Build and package the project.
     Package(subcommands::PackageArgs),
@@ -31,6 +34,7 @@ impl Args {
         match &self.cmd {
             Command::Init(args) => subcommands::init(self.verbose, args)?,
             Command::Build(args) => subcommands::build(self.verbose, args)?,
+            Command::Clean(args) => subcommands::clean(self.verbose, args)?,
             #[cfg(feature = "zip")]
             Command::Package(args) => subcommands::package(self.verbose, args)?,
             #[cfg(feature = "lang-debug")]
