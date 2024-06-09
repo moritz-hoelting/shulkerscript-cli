@@ -50,11 +50,14 @@ pub fn package(_verbose: bool, args: &PackageArgs) -> Result<()> {
     let toml_content = fs::read_to_string(&toml_path)?;
     let project_config = toml::from_str::<ProjectConfig>(&toml_content)?;
 
-    let main_path = toml_path
-        .parent()
-        .ok_or(Error::InvalidPackPathError(path.to_path_buf()))?
-        .join("src/main.shu");
-    let compiled = shulkerscript_lang::compile(&main_path)?;
+    let script_paths = super::build::get_script_paths(
+        &toml_path
+            .parent()
+            .ok_or(Error::InvalidPackPathError(path.to_path_buf()))?
+            .join("src"),
+    )?;
+
+    let compiled = shulkerscript_lang::compile(&script_paths)?;
 
     let dist_path = toml_path
         .parent()

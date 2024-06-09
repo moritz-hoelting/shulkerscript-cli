@@ -43,7 +43,8 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
             }
         }
         DumpState::Datapack => {
-            let datapack = shulkerscript_lang::transpile(&args.path)?;
+            let program_paths = super::build::get_script_paths(&args.path.join("src"))?;
+            let datapack = shulkerscript_lang::transpile(&program_paths)?;
             if args.pretty {
                 println!("{:#?}", datapack);
             } else {
