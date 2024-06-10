@@ -118,7 +118,7 @@ fn create_pack_config(
 
     fs::write(&path, toml::to_string_pretty(&content)?)?;
     if verbose {
-        print_info(&format!(
+        print_info(format!(
             "Created pack.toml file at {}.",
             path.absolutize()?.display()
         ));
@@ -130,7 +130,7 @@ fn create_dir(path: &Path, verbose: bool) -> std::io::Result<()> {
     if !path.exists() {
         fs::create_dir(path)?;
         if verbose {
-            print_info(&format!(
+            print_info(format!(
                 "Created directory at {}.",
                 path.absolutize()?.display()
             ));
@@ -143,7 +143,7 @@ fn create_gitignore(path: &Path, verbose: bool) -> std::io::Result<()> {
     let gitignore = path.join(".gitignore");
     fs::write(&gitignore, "/dist\n")?;
     if verbose {
-        print_info(&format!(
+        print_info(format!(
             "Created .gitignore file at {}.",
             gitignore.absolutize()?.display()
         ));
@@ -155,7 +155,7 @@ fn create_pack_png(path: &Path, verbose: bool) -> std::io::Result<()> {
     let pack_png = path.join("pack.png");
     fs::write(&pack_png, include_bytes!("../../assets/default-icon.png"))?;
     if verbose {
-        print_info(&format!(
+        print_info(format!(
             "Created pack.png file at {}.",
             pack_png.absolutize()?.display()
         ));
@@ -173,7 +173,7 @@ fn create_main_file(path: &Path, namespace: &str, verbose: bool) -> std::io::Res
         ),
     )?;
     if verbose {
-        print_info(&format!(
+        print_info(format!(
             "Created main.shu file at {}.",
             main_file.absolutize()?.display()
         ));

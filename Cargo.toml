@@ -24,8 +24,8 @@ colored = "2.1.0"
 serde = { version = "1.0.197", features = ["derive"] }
 thiserror = "1.0.58"
 toml = "0.8.12"
-shulkerscript-lang = { git = "https://github.com/moritz-hoelting/shulkerscript-lang", features = ["shulkerbox"], default-features = false, rev = "09b389c2060e73f686d92df3c45290c2c1b34ecb"}
-shulkerbox = { git = "https://github.com/moritz-hoelting/shulkerbox", default-features = false, rev = "296502dcc5dd29b3d930ffec91ceec3d161e0e47" }
+shulkerscript-lang = { git = "https://github.com/moritz-hoelting/shulkerscript-lang", features = ["shulkerbox"], default-features = false, rev = "44d634355b4ab5b652de56b0becd61b05680c068"}
+shulkerbox = { git = "https://github.com/moritz-hoelting/shulkerbox", default-features = false, rev = "b79c9ecd6d45f9319c9083a8103ef0186839b0c0" }
 git2 = { version = "0.18.3", default-features = false }
 path-absolutize = "3.1.1"
 color-eyre = "0.6.3"

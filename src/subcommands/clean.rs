@@ -44,7 +44,7 @@ pub fn clean(verbose: bool, args: &CleanArgs) -> Result<()> {
         delete_paths.push(dist_path.join(project_config.pack.name + ".zip"));
     }
 
-    print_info(&format!(
+    print_info(format!(
         "Cleaning project at {}",
         path.absolutize_from(path)?.display()
     ));
@@ -67,7 +67,7 @@ pub fn clean(verbose: bool, args: &CleanArgs) -> Result<()> {
         && dist_path.read_dir()?.next().is_none()
     {
         if verbose {
-            print_info(&format!("Deleting {:?}, as it is empty", dist_path));
+            print_info(format!("Deleting {:?}, as it is empty", dist_path));
         }
         std::fs::remove_dir(&dist_path)?;
     }
