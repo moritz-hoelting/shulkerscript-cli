@@ -1,13 +1,9 @@
-use std::fs;
+use std::{env, path::PathBuf};
 
 use color_eyre::eyre::Result;
 use path_absolutize::Absolutize;
 
-use crate::{
-    config::ProjectConfig,
-    error::Error,
-    terminal_output::{print_error, print_info},
-};
+use crate::{error::Error, terminal_output::print_info};
 
 use super::BuildArgs;
 
@@ -19,36 +15,19 @@ pub struct PackageArgs {
 
 pub fn package(_verbose: bool, args: &PackageArgs) -> Result<()> {
     let path = args.build_args.path.as_path();
+    let dist_path = args
+        .build_args
+        .output
+        .clone()
+        .or_else(|| env::var("DATAPACK_DIR").ok().map(PathBuf::from))
+        .unwrap_or_else(|| path.join("dist"));
 
     print_info(&format!(
         "Packaging project at {}",
         path.absolutize()?.display()
     ));
 
-    let toml_path = if !path.exists() {
-        print_error("The specified path does not exist.");
-        return Err(Error::PathNotFoundError(path.to_path_buf()))?;
-    } else if path.is_dir() {
-        let toml_path = path.join("pack.toml");
-        if !toml_path.exists() {
-            print_error("The specified directory does not contain a pack.toml file.");
-            Err(Error::InvalidPackPathError(path.to_path_buf()))?;
-        }
-        toml_path
-    } else if path.is_file()
-        && path
-            .file_name()
-            .ok_or(Error::InvalidPackPathError(path.to_path_buf()))?
-            == "pack.toml"
-    {
-        path.to_path_buf()
-    } else {
-        print_error("The specified path is neither a directory nor a pack.toml file.");
-        return Err(Error::InvalidPackPathError(path.to_path_buf()))?;
-    };
-
-    let toml_content = fs::read_to_string(&toml_path)?;
-    let project_config = toml::from_str::<ProjectConfig>(&toml_content)?;
+    let (project_config, toml_path) = super::build::get_pack_config(path)?;
 
     let script_paths = super::build::get_script_paths(
         &toml_path
@@ -59,11 +38,7 @@ pub fn package(_verbose: bool, args: &PackageArgs) -> Result<()> {
 
     let compiled = shulkerscript_lang::compile(&script_paths)?;
 
-    let dist_path = toml_path
-        .parent()
-        .expect("Failed to get parent directory of pack.toml")
-        .join("dist")
-        .join(project_config.pack.name + ".zip");
+    let dist_path = dist_path.join(project_config.pack.name + ".zip");
 
     compiled.zip(&dist_path)?;
 

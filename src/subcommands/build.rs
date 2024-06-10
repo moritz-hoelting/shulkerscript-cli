@@ -16,46 +16,31 @@ pub struct BuildArgs {
     /// The path of the project to build.
     #[clap(default_value = ".")]
     pub path: PathBuf,
+    /// The path of the directory to place the compiled datapack.
+    #[clap(short, long)]
+    pub output: Option<PathBuf>,
 }
 
 pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
     let path = args.path.as_path();
+    let dist_path = args
+        .output
+        .clone()
+        .or_else(|| env::var("DATAPACK_DIR").ok().map(PathBuf::from))
+        .unwrap_or_else(|| path.join("dist"));
 
     print_info(&format!(
         "Building project at {}",
         path.absolutize()?.display()
     ));
 
-    let toml_path = if !path.exists() {
-        print_error("The specified path does not exist.");
-        return Err(Error::PathNotFoundError(path.to_path_buf()))?;
-    } else if path.is_dir() {
-        let toml_path = path.join("pack.toml");
-        if !toml_path.exists() {
-            print_error("The specified directory does not contain a pack.toml file.");
-            Err(Error::InvalidPackPathError(path.to_path_buf()))?;
-        }
-        toml_path
-    } else if path.is_file()
-        && path
-            .file_name()
-            .ok_or(Error::InvalidPackPathError(path.to_path_buf()))?
-            == "pack.toml"
-    {
-        path.to_path_buf()
-    } else {
-        print_error("The specified path is neither a directory nor a pack.toml file.");
-        return Err(Error::InvalidPackPathError(path.to_path_buf()))?;
-    };
+    // env::set_current_dir(
+    //     toml_path
+    //         .parent()
+    //         .expect("Failed to get parent directory of pack.toml"),
+    // )?;
 
-    env::set_current_dir(
-        toml_path
-            .parent()
-            .expect("Failed to get parent directory of pack.toml"),
-    )?;
-
-    let toml_content = fs::read_to_string(&toml_path)?;
-    let project_config = toml::from_str::<ProjectConfig>(&toml_content)?;
+    let (project_config, toml_path) = get_pack_config(path)?;
 
     let script_paths = get_script_paths(
         &toml_path
@@ -66,11 +51,7 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
 
     let compiled = shulkerscript_lang::compile(&script_paths)?;
 
-    let dist_path = toml_path
-        .parent()
-        .expect("Failed to get parent directory of pack.toml")
-        .join("dist")
-        .join(project_config.pack.name);
+    let dist_path = dist_path.join(project_config.pack.name);
 
     compiled.place(&dist_path)?;
 
@@ -122,4 +103,38 @@ fn _get_script_paths(path: &Path, prefix: &str) -> std::io::Result<Vec<(String, 
     } else {
         Ok(Vec::new())
     }
+}
+
+/// Get the pack config and config path from a project path.
+///
+/// # Errors
+/// - If the specified path does not exist.
+/// - If the specified directory does not contain a pack.toml file.
+pub(super) fn get_pack_config(path: &Path) -> Result<(ProjectConfig, PathBuf)> {
+    let toml_path = if !path.exists() {
+        print_error("The specified path does not exist.");
+        return Err(Error::PathNotFoundError(path.to_path_buf()))?;
+    } else if path.is_dir() {
+        let toml_path = path.join("pack.toml");
+        if !toml_path.exists() {
+            print_error("The specified directory does not contain a pack.toml file.");
+            Err(Error::InvalidPackPathError(path.to_path_buf()))?;
+        }
+        toml_path
+    } else if path.is_file()
+        && path
+            .file_name()
+            .ok_or(Error::InvalidPackPathError(path.to_path_buf()))?
+            == "pack.toml"
+    {
+        path.to_path_buf()
+    } else {
+        print_error("The specified path is neither a directory nor a pack.toml file.");
+        return Err(Error::InvalidPackPathError(path.to_path_buf()))?;
+    };
+
+    let toml_content = fs::read_to_string(&toml_path)?;
+    let project_config = toml::from_str::<ProjectConfig>(&toml_content)?;
+
+    Ok((project_config, toml_path))
 }
