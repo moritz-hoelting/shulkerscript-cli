@@ -3,6 +3,14 @@ name = "shulkerscript"
 version = "0.1.0"
 edition = "2021"
 
+authors = ["Moritz Hölting <moritz@hoelting.dev>"]
+categories = ["command-line-utilities", "compilers"]
+description = "Command line tool to compile ShulkerScript projects"
+repository = "https://github.com/moritz-hoelting/shulkerscript-cli"
+readme = "README.md"
+license = "MIT"
+license-file = "LICENSE.txt"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
