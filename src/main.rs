@@ -1,7 +1,13 @@
+mod cli;
+mod config;
+mod error;
+mod subcommands;
+mod terminal_output;
+
 use std::process::ExitCode;
 
 use clap::Parser;
-use shulkerscript::cli::Args;
+use cli::Args;
 
 fn main() -> ExitCode {
     color_eyre::install().unwrap();

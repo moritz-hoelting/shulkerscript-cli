@@ -7,11 +7,6 @@ pub struct ProjectConfig {
     pub pack: PackConfig,
     pub compiler: Option<CompilerConfig>,
 }
-impl ProjectConfig {
-    pub fn new(pack: PackConfig, compiler: Option<CompilerConfig>) -> Self {
-        Self { pack, compiler }
-    }
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PackConfig {
@@ -26,16 +21,6 @@ pub struct PackConfig {
     pub version: String,
 }
 
-impl PackConfig {
-    pub fn new(name: &str, description: &str, pack_format: u8) -> Self {
-        Self {
-            name: name.to_string(),
-            description: description.to_string(),
-            pack_format,
-            version: "0.1.0".to_string(),
-        }
-    }
-}
 impl Default for PackConfig {
     fn default() -> Self {
         Self {
@@ -55,10 +40,4 @@ fn default_pack_format() -> u8 {
 pub struct CompilerConfig {
     /// The path of a folder which files and subfolders will be copied to the root of the datapack.
     pub assets: Option<PathBuf>,
-}
-
-impl CompilerConfig {
-    pub fn new(assets: Option<PathBuf>) -> Self {
-        Self { assets }
-    }
 }

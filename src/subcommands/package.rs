@@ -40,7 +40,7 @@ pub fn package(_verbose: bool, args: &PackageArgs) -> Result<()> {
             .join("src"),
     )?;
 
-    let mut compiled = shulkerscript_lang::compile(&script_paths)?;
+    let mut compiled = shulkerscript::compile(&script_paths)?;
 
     let icon_path = toml_path.parent().unwrap().join("pack.png");
 

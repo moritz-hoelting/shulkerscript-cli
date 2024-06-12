@@ -1,5 +1,5 @@
 [package]
-name = "shulkerscript"
+name = "shulkerscript-cli"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,10 +12,14 @@ license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bin]]
+name = "shulkerscript"
+path = "src/main.rs"
+
 [features]
 default = ["zip", "lua"]
 lang-debug = []
-lua = ["shulkerscript-lang/lua"]
+lua = ["shulkerscript/lua"]
 zip = ["shulkerbox/zip"]
 
 [dependencies]
@@ -24,7 +28,7 @@ colored = "2.1.0"
 serde = { version = "1.0.197", features = ["derive"] }
 thiserror = "1.0.58"
 toml = "0.8.12"
-shulkerscript-lang = { git = "https://github.com/moritz-hoelting/shulkerscript-lang", features = ["shulkerbox"], default-features = false, rev = "899a973315ce63ff20c789a7e7a784e926efc027"}
+shulkerscript = { git = "https://github.com/moritz-hoelting/shulkerscript-lang", features = ["shulkerbox"], default-features = false, rev = "5336ffb91ed5dfa1b2fce3993d84a2876aa732a3" }
 shulkerbox = { git = "https://github.com/moritz-hoelting/shulkerbox", default-features = false, rev = "b79c9ecd6d45f9319c9083a8103ef0186839b0c0" }
 git2 = { version = "0.18.3", default-features = false }
 path-absolutize = "3.1.1"

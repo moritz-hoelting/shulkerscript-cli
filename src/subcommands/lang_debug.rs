@@ -27,7 +27,7 @@ pub enum DumpState {
 pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
     match args.dump {
         DumpState::Tokens => {
-            let tokens = shulkerscript_lang::tokenize(&args.path)?;
+            let tokens = shulkerscript::tokenize(&args.path)?;
             if args.pretty {
                 println!("{:#?}", tokens);
             } else {
@@ -35,7 +35,7 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
             }
         }
         DumpState::Ast => {
-            let ast = shulkerscript_lang::parse(&args.path)?;
+            let ast = shulkerscript::parse(&args.path)?;
             if args.pretty {
                 println!("{:#?}", ast);
             } else {
@@ -44,7 +44,7 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
         }
         DumpState::Datapack => {
             let program_paths = super::build::get_script_paths(&args.path.join("src"))?;
-            let datapack = shulkerscript_lang::transpile(&program_paths)?;
+            let datapack = shulkerscript::transpile(&program_paths)?;
             if args.pretty {
                 println!("{:#?}", datapack);
             } else {

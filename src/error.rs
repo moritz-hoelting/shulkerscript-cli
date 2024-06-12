@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+#[allow(clippy::enum_variant_names)]
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("No file/directory found at path {0}.")]
@@ -12,4 +13,5 @@ pub enum Error {
     InvalidPackPathError(PathBuf),
 }
 
+#[allow(dead_code)]
 pub type Result<T> = std::result::Result<T, Error>;
