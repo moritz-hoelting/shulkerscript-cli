@@ -4,7 +4,7 @@ This is a cli tool for the shulkerscript language. It can be used to initialize 
 
 ## Installation
 ```bash	
-cargo install --git https://github.com/moritz-hoelting/shulkerscript-cli
+cargo install --git https://github.com/moritz-hoelting/shulkerscript-cli.git
 ```
 
 ## Usage
