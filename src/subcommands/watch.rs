@@ -1,8 +1,4 @@
-use std::{
-    path::{Path, PathBuf},
-    thread,
-    time::Duration,
-};
+use std::{path::Path, thread, time::Duration};
 
 use clap::Subcommand;
 use notify_debouncer_mini::{new_debouncer, notify::*, DebounceEventResult};
@@ -31,34 +27,25 @@ pub struct WatchArgs {
 pub enum WatchSubcommand {
     /// Build the project.
     Build(BuildArgs),
-    #[cfg(feature = "zip")]
-    /// Build and package the project.
-    Package(super::PackageArgs),
 }
 
 impl From<WatchSubcommand> for Command {
     fn from(value: WatchSubcommand) -> Self {
         match value {
             WatchSubcommand::Build(args) => Command::Build(args),
-            #[cfg(feature = "zip")]
-            WatchSubcommand::Package(args) => Command::Package(args),
         }
     }
 }
 
 pub fn watch(verbose: bool, args: &WatchArgs) -> Result<()> {
-    let cmd = Command::from(args.cmd.to_owned().unwrap_or_else(|| {
-        WatchSubcommand::Build(BuildArgs {
-            path: PathBuf::from("."),
-            output: None,
-            assets: None,
-        })
-    }));
+    let cmd = Command::from(
+        args.cmd
+            .to_owned()
+            .unwrap_or_else(|| WatchSubcommand::Build(BuildArgs::default())),
+    );
 
     let project_path = match &args.cmd {
         Some(WatchSubcommand::Build(args)) => args.path.as_path(),
-        #[cfg(feature = "zip")]
-        Some(WatchSubcommand::Package(args)) => args.build_args.path.as_path(),
         None => Path::new("."),
     };
 

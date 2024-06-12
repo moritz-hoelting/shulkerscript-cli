@@ -28,7 +28,9 @@ shulkerscript build [OPTIONS] [PATH]
 Where [PATH] is the path of the project folder to build [default: `.`]
 
 Options:
+- `--assets <ASSETS>`  The path to the assets directory [default: `./assets`]
 - `--output <OUTPUT>`  The output directory, overrides the `DATAPACK_DIR` environment variable
+- `--zip`              Package the output into a zip file
 
 Environment variables:
 - `DATAPACK_DIR`       The output directory [default: `./dist`]
@@ -38,18 +40,6 @@ Environment variables:
 shulkerscript clean [OPTIONS] [PATH]
 ```
 Where [PATH] is the path of the project folder to clean [default: `.`]
-
-Options:
-- `--output <OUTPUT>`  The output directory, overrides the `DATAPACK_DIR` environment variable
-
-Environment variables:
-- `DATAPACK_DIR`       The output directory [default: `./dist`]
-
-### Package a project
-```bash
-shulkerscript package [OPTIONS] [PATH]
-```
-Where [PATH] is the path of the project folder to package [default: `.`]
 
 Options:
 - `--output <OUTPUT>`  The output directory, overrides the `DATAPACK_DIR` environment variable

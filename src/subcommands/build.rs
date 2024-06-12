@@ -1,4 +1,4 @@
-use color_eyre::eyre::Result;
+use color_eyre::eyre::{Report, Result};
 use path_absolutize::Absolutize;
 use shulkerbox::virtual_fs::{VFile, VFolder};
 
@@ -25,9 +25,30 @@ pub struct BuildArgs {
     /// Overrides the `assets` field in the pack.toml file.
     #[clap(short, long)]
     pub assets: Option<PathBuf>,
+    /// Whether to package the project to a zip file.
+    #[clap(short, long)]
+    pub zip: bool,
+}
+
+impl Default for BuildArgs {
+    fn default() -> Self {
+        Self {
+            path: PathBuf::from("."),
+            output: None,
+            assets: None,
+            zip: false,
+        }
+    }
 }
 
 pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
+    if args.zip && !cfg!(feature = "zip") {
+        print_error("The zip feature is not enabled. Please install with the `zip` feature enabled to use the `--zip` option.");
+        return Err(Report::from(Error::FeatureNotEnabledError(
+            "zip".to_string(),
+        )));
+    }
+
     let path = args.path.as_path();
     let dist_path = args
         .output
@@ -35,8 +56,10 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
         .or_else(|| env::var("DATAPACK_DIR").ok().map(PathBuf::from))
         .unwrap_or_else(|| path.join("dist"));
 
+    let and_package_msg = if args.zip { " and packaging" } else { "" };
+
     print_info(format!(
-        "Building project at {}",
+        "Building{and_package_msg} project at {}",
         path.absolutize()?.display()
     ));
 
@@ -87,12 +110,22 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
         compiled
     };
 
-    let dist_path = dist_path.join(project_config.pack.name);
+    let dist_extension = if args.zip { ".zip" } else { "" };
 
+    let dist_path = dist_path.join(project_config.pack.name + dist_extension);
+
+    #[cfg(feature = "zip")]
+    if args.zip {
+        output.zip(&dist_path)?;
+    } else {
+        output.place(&dist_path)?;
+    }
+
+    #[cfg(not(feature = "zip"))]
     output.place(&dist_path)?;
 
     print_info(format!(
-        "Finished building project to {}",
+        "Finished building{and_package_msg} project to {}",
         dist_path.absolutize_from(path)?.display()
     ));
 

@@ -11,6 +11,8 @@ pub enum Error {
     NotDirectoryError(PathBuf),
     #[error("An error occured because the path is neither a pack directory or a pack.toml file.")]
     InvalidPackPathError(PathBuf),
+    #[error("An error occured because the feature {0} is not enabled.")]
+    FeatureNotEnabledError(String),
 }
 
 #[allow(dead_code)]

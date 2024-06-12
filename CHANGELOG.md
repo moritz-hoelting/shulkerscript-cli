@@ -14,9 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Subcommand `build` to build a project
     - Compiles the project to a datapack directory
     - Allows changing the output directory and setting a assets directory
-- Subcommand `package` to build and package a project to a zip file
-    - Same options as `build`
 - Subcommand `clean` to clean the output directory
+- Subcommand `watch` to watch for changes and run a command
 - Subcommand `lang-debug` to debug the language parser
     - Allows to print the parsed tokens, AST and shulkerbox datapack representation
 

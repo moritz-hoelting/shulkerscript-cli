@@ -21,9 +21,6 @@ pub enum Command {
     /// Clean build artifacts.
     /// This will remove the `dist` directory.
     Clean(CleanArgs),
-    #[cfg(feature = "zip")]
-    /// Build and package the project.
-    Package(subcommands::PackageArgs),
     #[cfg(feature = "watch")]
     /// Watch for changes and execute command.
     Watch(subcommands::WatchArgs),
@@ -44,8 +41,6 @@ impl Command {
             Command::Init(args) => subcommands::init(verbose, args)?,
             Command::Build(args) => subcommands::build(verbose, args)?,
             Command::Clean(args) => subcommands::clean(verbose, args)?,
-            #[cfg(feature = "zip")]
-            Command::Package(args) => subcommands::package(verbose, args)?,
             #[cfg(feature = "watch")]
             Command::Watch(args) => subcommands::watch(verbose, args)?,
             #[cfg(feature = "lang-debug")]

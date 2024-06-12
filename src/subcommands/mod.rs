@@ -7,11 +7,6 @@ pub use build::{build, BuildArgs};
 mod clean;
 pub use clean::{clean, CleanArgs};
 
-#[cfg(feature = "zip")]
-mod package;
-#[cfg(feature = "zip")]
-pub use package::{package, PackageArgs};
-
 #[cfg(feature = "watch")]
 mod watch;
 #[cfg(feature = "watch")]
