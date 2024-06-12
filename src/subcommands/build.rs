@@ -1,6 +1,6 @@
 use color_eyre::eyre::Result;
 use path_absolutize::Absolutize;
-use shulkerbox::virtual_fs::VFolder;
+use shulkerbox::virtual_fs::{VFile, VFolder};
 
 use crate::{
     config::ProjectConfig,
@@ -40,12 +40,6 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
         path.absolutize()?.display()
     ));
 
-    // env::set_current_dir(
-    //     toml_path
-    //         .parent()
-    //         .expect("Failed to get parent directory of pack.toml"),
-    // )?;
-
     let (project_config, toml_path) = get_pack_config(path)?;
 
     let script_paths = get_script_paths(
@@ -55,7 +49,15 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
             .join("src"),
     )?;
 
-    let compiled = shulkerscript_lang::compile(&script_paths)?;
+    let mut compiled = shulkerscript_lang::compile(&script_paths)?;
+
+    let icon_path = toml_path.parent().unwrap().join("pack.png");
+
+    if icon_path.is_file() {
+        if let Ok(icon_data) = fs::read(icon_path) {
+            compiled.add_file("pack.png", VFile::Binary(icon_data));
+        }
+    }
 
     let assets_path = args.assets.clone().or(project_config
         .compiler

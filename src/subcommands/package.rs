@@ -1,8 +1,8 @@
-use std::{env, path::PathBuf};
+use std::{env, fs, path::PathBuf};
 
 use color_eyre::eyre::Result;
 use path_absolutize::Absolutize;
-use shulkerbox::virtual_fs::VFolder;
+use shulkerbox::virtual_fs::{VFile, VFolder};
 
 use crate::{
     error::Error,
@@ -40,7 +40,15 @@ pub fn package(_verbose: bool, args: &PackageArgs) -> Result<()> {
             .join("src"),
     )?;
 
-    let compiled = shulkerscript_lang::compile(&script_paths)?;
+    let mut compiled = shulkerscript_lang::compile(&script_paths)?;
+
+    let icon_path = toml_path.parent().unwrap().join("pack.png");
+
+    if icon_path.is_file() {
+        if let Ok(icon_data) = fs::read(icon_path) {
+            compiled.add_file("pack.png", VFile::Binary(icon_data));
+        }
+    }
 
     let assets_path = args.build_args.assets.clone().or(project_config
         .compiler
