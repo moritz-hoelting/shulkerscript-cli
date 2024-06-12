@@ -14,7 +14,7 @@ use super::BuildArgs;
 #[derive(Debug, clap::Args, Clone)]
 pub struct PackageArgs {
     #[clap(flatten)]
-    build_args: BuildArgs,
+    pub build_args: BuildArgs,
 }
 
 pub fn package(_verbose: bool, args: &PackageArgs) -> Result<()> {

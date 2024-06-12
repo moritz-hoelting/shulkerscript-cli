@@ -7,13 +7,13 @@ use std::path::PathBuf;
 pub struct LangDebugArgs {
     /// The path of the project to compile.
     #[clap(default_value = ".")]
-    path: PathBuf,
+    pub path: PathBuf,
     /// The state to dump.
     #[clap(short, long, default_value = "ast")]
-    dump: DumpState,
+    pub dump: DumpState,
     /// Pretty-print the output.
     #[clap(short, long)]
-    pretty: bool,
+    pub pretty: bool,
 }
 
 #[derive(ValueEnum, Debug, Clone, Copy, Default)]

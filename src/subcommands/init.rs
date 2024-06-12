@@ -20,26 +20,26 @@ use crate::{
 pub struct InitArgs {
     /// The path of the folder to initialize in.
     #[clap(default_value = ".")]
-    path: PathBuf,
+    pub path: PathBuf,
     /// The name of the project.
     #[clap(short, long)]
-    name: Option<String>,
+    pub name: Option<String>,
     /// The description of the project.
     #[clap(short, long)]
-    description: Option<String>,
+    pub description: Option<String>,
     /// The pack format version.
     #[clap(short, long)]
-    pack_format: Option<u8>,
+    pub pack_format: Option<u8>,
     /// Force initialization even if the directory is not empty.
     #[clap(short, long)]
-    force: bool,
+    pub force: bool,
     /// The version control system to initialize.
     #[clap(long, default_value = "git")]
-    vcs: VersionControlSystem,
+    pub vcs: VersionControlSystem,
 }
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum)]
-enum VersionControlSystem {
+pub enum VersionControlSystem {
     #[default]
     Git,
     None,

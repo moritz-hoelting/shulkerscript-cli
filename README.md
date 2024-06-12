@@ -57,6 +57,16 @@ Options:
 Environment variables:
 - `DATAPACK_DIR`       The output directory [default: `./dist`]
 
+### Watch for changes
+```bash
+shulkerscript watch [OPTIONS] [SUBCOMMAND]
+```
+Where [SUBCOMMAND] is either `build` or `package` [default: `build`]
+
+Options:
+- `--no-initial`                     Do not run the command initially
+- `--debounce-time <DEBOUNCE_TIME>`  The time to wait in ms after the last change before running the command [default: `2000`]
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first

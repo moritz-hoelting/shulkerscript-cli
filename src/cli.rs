@@ -24,6 +24,9 @@ pub enum Command {
     #[cfg(feature = "zip")]
     /// Build and package the project.
     Package(subcommands::PackageArgs),
+    #[cfg(feature = "watch")]
+    /// Watch for changes and execute command.
+    Watch(subcommands::WatchArgs),
     #[cfg(feature = "lang-debug")]
     /// Build the project and dump the intermediate state.
     LangDebug(subcommands::LangDebugArgs),
@@ -31,12 +34,20 @@ pub enum Command {
 
 impl Args {
     pub fn run(&self) -> Result<()> {
-        match &self.cmd {
-            Command::Init(args) => subcommands::init(self.verbose, args)?,
-            Command::Build(args) => subcommands::build(self.verbose, args)?,
-            Command::Clean(args) => subcommands::clean(self.verbose, args)?,
+        self.cmd.run(self.verbose)
+    }
+}
+
+impl Command {
+    pub fn run(&self, verbose: bool) -> Result<()> {
+        match self {
+            Command::Init(args) => subcommands::init(verbose, args)?,
+            Command::Build(args) => subcommands::build(verbose, args)?,
+            Command::Clean(args) => subcommands::clean(verbose, args)?,
             #[cfg(feature = "zip")]
-            Command::Package(args) => subcommands::package(self.verbose, args)?,
+            Command::Package(args) => subcommands::package(verbose, args)?,
+            #[cfg(feature = "watch")]
+            Command::Watch(args) => subcommands::watch(verbose, args)?,
             #[cfg(feature = "lang-debug")]
             Command::LangDebug(args) => subcommands::lang_debug(args)?,
         }

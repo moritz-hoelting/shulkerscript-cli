@@ -17,9 +17,10 @@ name = "shulkerscript"
 path = "src/main.rs"
 
 [features]
-default = ["zip", "lua"]
+default = ["zip", "lua", "watch"]
 lang-debug = []
 lua = ["shulkerscript/lua"]
+watch = ["dep:notify-debouncer-mini", "dep:ctrlc"]
 zip = ["shulkerbox/zip"]
 
 [dependencies]
@@ -34,4 +35,5 @@ git2 = { version = "0.18.3", default-features = false }
 path-absolutize = "3.1.1"
 color-eyre = "0.6.3"
 dotenvy = "0.15.7"
-
+notify-debouncer-mini = { version = "0.4.1", default-features = false, optional = true }
+ctrlc = { version = "3.4.4", optional = true }

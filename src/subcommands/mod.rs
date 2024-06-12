@@ -12,6 +12,11 @@ mod package;
 #[cfg(feature = "zip")]
 pub use package::{package, PackageArgs};
 
+#[cfg(feature = "watch")]
+mod watch;
+#[cfg(feature = "watch")]
+pub use watch::{watch, WatchArgs};
+
 #[cfg(feature = "lang-debug")]
 mod lang_debug;
 #[cfg(feature = "lang-debug")]
