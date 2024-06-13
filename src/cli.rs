@@ -2,7 +2,7 @@ use crate::subcommands::{self, BuildArgs, CleanArgs, InitArgs};
 use clap::{Parser, Subcommand};
 use color_eyre::eyre::Result;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
 pub struct Args {
     #[command(subcommand)]
@@ -22,7 +22,7 @@ pub enum Command {
     /// This will remove the `dist` directory.
     Clean(CleanArgs),
     #[cfg(feature = "watch")]
-    /// Watch for changes and execute command.
+    /// Watch for changes and execute commands.
     Watch(subcommands::WatchArgs),
     #[cfg(feature = "lang-debug")]
     /// Build the project and dump the intermediate state.

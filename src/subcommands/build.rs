@@ -5,10 +5,11 @@ use shulkerbox::virtual_fs::{VFile, VFolder};
 use crate::{
     config::ProjectConfig,
     error::Error,
-    terminal_output::{print_error, print_info, print_warning},
+    terminal_output::{print_error, print_info, print_success, print_warning},
 };
 use std::{
-    env, fs,
+    borrow::Cow,
+    fs,
     path::{Path, PathBuf},
 };
 
@@ -18,8 +19,7 @@ pub struct BuildArgs {
     #[clap(default_value = ".")]
     pub path: PathBuf,
     /// The path of the directory to place the compiled datapack.
-    /// Overrides the `DATAPACK_DIR` environment variable.
-    #[clap(short, long)]
+    #[clap(short, long, env = "DATAPACK_DIR")]
     pub output: Option<PathBuf>,
     /// The path of a folder which files and subfolders will be copied to the root of the datapack.
     /// Overrides the `assets` field in the pack.toml file.
@@ -52,9 +52,9 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
     let path = args.path.as_path();
     let dist_path = args
         .output
-        .clone()
-        .or_else(|| env::var("DATAPACK_DIR").ok().map(PathBuf::from))
-        .unwrap_or_else(|| path.join("dist"));
+        .as_ref()
+        .map(Cow::Borrowed)
+        .unwrap_or_else(|| Cow::Owned(path.join("dist")));
 
     let and_package_msg = if args.zip { " and packaging" } else { "" };
 
@@ -124,7 +124,7 @@ pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
     #[cfg(not(feature = "zip"))]
     output.place(&dist_path)?;
 
-    print_info(format!(
+    print_success(format!(
         "Finished building{and_package_msg} project to {}",
         dist_path.absolutize_from(path)?.display()
     ));

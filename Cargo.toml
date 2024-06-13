@@ -24,7 +24,7 @@ watch = ["dep:notify-debouncer-mini", "dep:ctrlc"]
 zip = ["shulkerbox/zip"]
 
 [dependencies]
-clap = { version = "4.5.4", features = ["derive"] }
+clap = { version = "4.5.4", features = ["derive", "env"] }
 colored = "2.1.0"
 serde = { version = "1.0.197", features = ["derive"] }
 thiserror = "1.0.58"

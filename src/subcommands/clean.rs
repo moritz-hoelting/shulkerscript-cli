@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf};
+use std::{borrow::Cow, path::PathBuf};
 
 use color_eyre::eyre::Result;
 use path_absolutize::Absolutize;
@@ -11,7 +11,7 @@ pub struct CleanArgs {
     #[clap(default_value = ".")]
     pub path: PathBuf,
     /// The path of the directory where the compiled datapacks are placed.
-    #[clap(short, long)]
+    #[clap(short, long, env = "DATAPACK_DIR")]
     pub output: Option<PathBuf>,
     /// Clean the whole output folder
     #[clap(short, long)]
@@ -25,9 +25,9 @@ pub fn clean(verbose: bool, args: &CleanArgs) -> Result<()> {
     let path = args.path.as_path();
     let dist_path = args
         .output
-        .clone()
-        .or_else(|| env::var("DATAPACK_DIR").ok().map(PathBuf::from))
-        .unwrap_or_else(|| path.join("dist"));
+        .as_ref()
+        .map(Cow::Borrowed)
+        .unwrap_or_else(|| Cow::Owned(path.join("dist")));
 
     let mut delete_paths = Vec::new();
 
@@ -35,7 +35,7 @@ pub fn clean(verbose: bool, args: &CleanArgs) -> Result<()> {
 
     if args.all {
         if args.force {
-            delete_paths.push(dist_path.clone());
+            delete_paths.push(dist_path.clone().into_owned());
         } else {
             print_error("You must use the --force flag to clean the whole output folder.")
         }
@@ -69,7 +69,7 @@ pub fn clean(verbose: bool, args: &CleanArgs) -> Result<()> {
         if verbose {
             print_info(format!("Deleting {:?}, as it is empty", dist_path));
         }
-        std::fs::remove_dir(&dist_path)?;
+        std::fs::remove_dir(dist_path.as_ref())?;
     }
 
     print_success("Project cleaned successfully.");
