@@ -24,10 +24,14 @@ pub struct WatchArgs {
     #[clap(short, long)]
     pub no_inital: bool,
     /// The time to wait in ms before running the command after changes are detected.
-    #[clap(short, long, default_value = "2000")]
+    #[clap(short, long, value_name = "TIME_IN_MS", default_value = "2000")]
     pub debounce_time: u64,
-    /// The commands to run in the project directory when changes are detected.
-    #[clap(short = 'x', long, default_value = "build .")]
+    /// Additional paths to watch for changes.
+    /// By default, the `src` directory, `pack.png`, and `pack.toml` as well as the defined assets directory in the config are watched.
+    #[clap(short, long, value_name = "PATH")]
+    pub watch: Vec<PathBuf>,
+    /// The commands to run in the project directory when changes are detected. Use multiple times to run multiple commands.
+    #[clap(short = 'x', long, value_name = "COMMAND", default_value = "build .")]
     pub execute: Vec<String>,
 }
 
@@ -58,7 +62,16 @@ pub fn watch(_verbose: bool, args: &WatchArgs) -> Result<()> {
         })
         .collect::<Vec<_>>();
 
-    if env::set_current_dir(args.path.as_path()).is_err() {
+    let current_dir = if args.no_inital {
+        print_info("Skipping initial commands because of cli flag.");
+        None
+    } else {
+        env::current_dir().ok()
+    };
+
+    if !args.no_inital
+        && (current_dir.is_none() || env::set_current_dir(args.path.as_path()).is_err())
+    {
         print_warning("Failed to change working directory to project path. Commands may not work.");
     }
 
@@ -85,6 +98,14 @@ pub fn watch(_verbose: bool, args: &WatchArgs) -> Result<()> {
     )
     .expect("Failed to initialize watcher");
 
+    if let Some(prev_cwd) = current_dir {
+        env::set_current_dir(prev_cwd).expect("Failed to change working directory back");
+    }
+
+    let assets_path = super::build::get_pack_config(&args.path)
+        .ok()
+        .and_then(|(conf, _)| conf.compiler.and_then(|c| c.assets));
+
     let watcher = debouncer.watcher();
     watcher
         .watch(args.path.join("src").as_path(), RecursiveMode::Recursive)
@@ -101,6 +122,32 @@ pub fn watch(_verbose: bool, args: &WatchArgs) -> Result<()> {
             RecursiveMode::NonRecursive,
         )
         .expect("Failed to watch project pack.toml");
+    if let Some(assets_path) = assets_path {
+        let full_assets_path = args.path.join(assets_path);
+        if full_assets_path.exists() {
+            watcher
+                .watch(full_assets_path.as_path(), RecursiveMode::Recursive)
+                .expect("Failed to watch project assets");
+        }
+    }
+
+    // custom watch paths
+    for path in args.watch.iter() {
+        if path.exists() {
+            watcher
+                .watch(path.as_path(), RecursiveMode::Recursive)
+                .expect("Failed to watch custom path");
+        } else {
+            print_warning(format!(
+                "Path {} does not exist. Skipping...",
+                path.display()
+            ));
+        }
+    }
+
+    if env::set_current_dir(args.path.as_path()).is_err() {
+        print_warning("Failed to change working directory to project path. Commands may not work.");
+    }
 
     loop {
         thread::sleep(Duration::from_secs(60));

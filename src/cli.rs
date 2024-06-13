@@ -50,3 +50,15 @@ impl Command {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use clap::CommandFactory;
+
+    use super::*;
+
+    #[test]
+    fn verify_cli() {
+        Args::command().debug_assert();
+    }
+}

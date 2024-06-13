@@ -18,7 +18,7 @@ Where [PATH] is the path of the folder to initialize in [default: `.`]
 Options:
 - `--name <NAME>`                The name of the project
 - `--description <DESCRIPTION>`  The description of the project
-- `--pack-format <PACK_FORMAT>`  The pack format version
+- `--pack-format <FORMAT>`  The pack format version
 - `--force`                      Force initialization even if the directory is not empty
 
 ### Build a project
@@ -57,7 +57,8 @@ Where [PATH] is the path of the project folder to watch [default: `.`]
 
 Options:
 - `--no-initial`                     Do not run the command initially
-- `--debounce-time <DEBOUNCE_TIME>`  The time to wait in ms after the last change before running the command [default: `2000`]
+- `--debounce-time <TIME_IN_MS>`  The time to wait in ms after the last change before running the command [default: `2000`]
+- `--watch <PATH>`                  The directories to watch for changes [multi-arg, default: `src`, `pack.toml`, `pack.png`, assets directory]
 - `--execute <COMMAND>`              The commands (cli subcommands or shell commands) to execute in the project  when changes have been detected [multi-arg, default: `build`]
 
 ## Contributing

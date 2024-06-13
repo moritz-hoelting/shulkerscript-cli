@@ -28,7 +28,7 @@ pub struct InitArgs {
     #[clap(short, long)]
     pub description: Option<String>,
     /// The pack format version.
-    #[clap(short, long)]
+    #[clap(short, long, value_name = "FORMAT")]
     pub pack_format: Option<u8>,
     /// Force initialization even if the directory is not empty.
     #[clap(short, long)]
