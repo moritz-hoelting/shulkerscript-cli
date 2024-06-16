@@ -9,6 +9,8 @@ pub struct LangDebugArgs {
     #[clap(default_value = ".")]
     pub path: PathBuf,
     /// The state to dump.
+    ///
+    /// Output can be the raw tokens, the abstract syntax tree, or the transpiled datapack.
     #[clap(short, long, value_name = "STATE", default_value = "ast")]
     pub dump: DumpState,
     /// Pretty-print the output.

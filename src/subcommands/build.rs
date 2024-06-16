@@ -18,14 +18,18 @@ pub struct BuildArgs {
     /// The path of the project to build.
     #[clap(default_value = ".")]
     pub path: PathBuf,
+    /// Path of output directory
+    ///
     /// The path of the directory to place the compiled datapack.
     #[clap(short, long, env = "DATAPACK_DIR")]
     pub output: Option<PathBuf>,
+    /// Path of the assets folder
+    ///
     /// The path of a folder which files and subfolders will be copied to the root of the datapack.
     /// Overrides the `assets` field in the pack.toml file.
     #[clap(short, long)]
     pub assets: Option<PathBuf>,
-    /// Whether to package the project to a zip file.
+    /// Package the project to a zip file.
     #[clap(short, long)]
     pub zip: bool,
 }
@@ -41,7 +45,7 @@ impl Default for BuildArgs {
     }
 }
 
-pub fn build(_verbose: bool, args: &BuildArgs) -> Result<()> {
+pub fn build(args: &BuildArgs) -> Result<()> {
     if args.zip && !cfg!(feature = "zip") {
         print_error("The zip feature is not enabled. Please install with the `zip` feature enabled to use the `--zip` option.");
         return Err(Report::from(Error::FeatureNotEnabledError(

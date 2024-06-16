@@ -36,6 +36,9 @@ pub struct InitArgs {
     /// The version control system to initialize.
     #[clap(long, default_value = "git")]
     pub vcs: VersionControlSystem,
+    /// Enable verbose output.
+    #[clap(short, long)]
+    verbose: bool,
 }
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum)]
@@ -45,7 +48,8 @@ pub enum VersionControlSystem {
     None,
 }
 
-pub fn init(verbose: bool, args: &InitArgs) -> Result<()> {
+pub fn init(args: &InitArgs) -> Result<()> {
+    let verbose = args.verbose;
     let path = args.path.as_path();
     let description = args.description.as_deref();
     let pack_format = args.pack_format;

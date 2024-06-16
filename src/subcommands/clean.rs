@@ -19,9 +19,13 @@ pub struct CleanArgs {
     /// Force clean
     #[clap(short, long)]
     pub force: bool,
+    /// Enable verbose output.
+    #[clap(short, long)]
+    verbose: bool,
 }
 
-pub fn clean(verbose: bool, args: &CleanArgs) -> Result<()> {
+pub fn clean(args: &CleanArgs) -> Result<()> {
+    let verbose = args.verbose;
     let path = args.path.as_path();
     let dist_path = args
         .output

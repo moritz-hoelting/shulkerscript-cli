@@ -20,17 +20,23 @@ pub struct WatchArgs {
     /// The path of the project to watch.
     #[clap(default_value = ".")]
     pub path: PathBuf,
-    /// Do not run the command when starting, only after changes are detected.
+    /// Only run after changes are detected.
+    ///
+    /// Skips the initial run of the commands.
     #[clap(short, long)]
     pub no_inital: bool,
     /// The time to wait in ms before running the command after changes are detected.
     #[clap(short, long, value_name = "TIME_IN_MS", default_value = "2000")]
     pub debounce_time: u64,
     /// Additional paths to watch for changes.
-    /// By default, the `src` directory, `pack.png`, and `pack.toml` as well as the defined assets directory in the config are watched.
+    ///
+    /// By default, the `src` directory, `pack.png`, and `pack.toml` as well as the defined
+    /// assets directory in the config are watched.
     #[clap(short, long, value_name = "PATH")]
     pub watch: Vec<PathBuf>,
-    /// The commands to run in the project directory when changes are detected. Use multiple times to run multiple commands.
+    /// The commands to run in the project directory when changes are detected.
+    ///
+    /// Use multiple times to run multiple commands.
     #[clap(short = 'x', long, value_name = "COMMAND", default_value = "build .")]
     pub execute: Vec<String>,
 }
@@ -41,7 +47,7 @@ enum WatchCommand {
     External(String),
 }
 
-pub fn watch(_verbose: bool, args: &WatchArgs) -> Result<()> {
+pub fn watch(args: &WatchArgs) -> Result<()> {
     print_info(format!("Watching project at {}", args.path.display()));
 
     let commands = args
