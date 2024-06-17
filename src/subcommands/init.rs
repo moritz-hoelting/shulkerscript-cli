@@ -1,4 +1,6 @@
 use std::{
+    borrow::Cow,
+    fmt::Display,
     fs,
     path::{Path, PathBuf},
 };
@@ -11,7 +13,7 @@ use git2::{
 use path_absolutize::Absolutize;
 
 use crate::{
-    config::ProjectConfig,
+    config::{PackConfig, ProjectConfig},
     error::Error,
     terminal_output::{print_error, print_info, print_success},
 };
@@ -28,17 +30,26 @@ pub struct InitArgs {
     #[arg(short, long)]
     pub description: Option<String>,
     /// The pack format version.
-    #[arg(short, long, value_name = "FORMAT")]
+    #[arg(short, long, value_name = "FORMAT", visible_alias = "format")]
     pub pack_format: Option<u8>,
+    /// The path of the icon file.
+    #[arg(short, long = "icon", value_name = "PATH")]
+    pub icon_path: Option<PathBuf>,
     /// Force initialization even if the directory is not empty.
     #[arg(short, long)]
     pub force: bool,
-    /// The version control system to initialize.
-    #[arg(long, default_value = "git")]
-    pub vcs: VersionControlSystem,
+    /// The version control system to initialize. [default: git]
+    #[arg(long)]
+    pub vcs: Option<VersionControlSystem>,
     /// Enable verbose output.
     #[arg(short, long)]
-    verbose: bool,
+    pub verbose: bool,
+    /// Enable batch mode.
+    ///
+    /// In batch mode, the command will not prompt the user for input and
+    /// will use the default values instead if possible or fail.
+    #[arg(long)]
+    pub batch: bool,
 }
 
 #[derive(Debug, Clone, Copy, Default, ValueEnum)]
@@ -48,54 +59,258 @@ pub enum VersionControlSystem {
     None,
 }
 
+impl Display for VersionControlSystem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VersionControlSystem::Git => write!(f, "git"),
+            VersionControlSystem::None => write!(f, "none"),
+        }
+    }
+}
+
 pub fn init(args: &InitArgs) -> Result<()> {
+    if args.batch {
+        initialize_batch(args)
+    } else {
+        initialize_interactive(args)
+    }
+}
+
+fn initialize_batch(args: &InitArgs) -> Result<()> {
     let verbose = args.verbose;
+    let force = args.force;
     let path = args.path.as_path();
     let description = args.description.as_deref();
     let pack_format = args.pack_format;
-    let force = args.force;
+    let vcs = args.vcs.unwrap_or(VersionControlSystem::Git);
 
     if !path.exists() {
-        print_error("The specified path does not exist.");
-        Err(Error::PathNotFoundError(path.to_path_buf()))?
+        if force {
+            fs::create_dir_all(path)?;
+        } else {
+            print_error("The specified path does not exist.");
+            Err(Error::PathNotFoundError(path.to_path_buf()))?;
+        }
+    } else if !path.is_dir() {
+        print_error("The specified path is not a directory.");
+        Err(Error::NotDirectoryError(path.to_path_buf()))?;
+    } else if !force && path.read_dir()?.next().is_some() {
+        print_error("The specified directory is not empty.");
+        Err(Error::NonEmptyDirectoryError(path.to_path_buf()))?;
+    }
+
+    let name = args
+        .name
+        .as_deref()
+        .or_else(|| path.file_name().and_then(|os| os.to_str()));
+
+    print_info("Initializing a new Shulkerscript project in batch mode...");
+
+    // Create the pack.toml file
+    create_pack_config(verbose, path, name, description, pack_format)?;
+
+    // Create the pack.png file
+    create_pack_png(path, args.icon_path.as_deref(), verbose)?;
+
+    // Create the src directory
+    let src_path = path.join("src");
+    create_dir(&src_path, verbose)?;
+
+    // Create the main.shu file
+    create_main_file(
+        path,
+        &name_to_namespace(name.unwrap_or(PackConfig::DEFAULT_NAME)),
+        verbose,
+    )?;
+
+    // Initialize the version control system
+    initalize_vcs(path, vcs, verbose)?;
+
+    print_success("Project initialized successfully.");
+
+    Ok(())
+}
+
+fn initialize_interactive(args: &InitArgs) -> Result<()> {
+    const ABORT_MSG: &str = "Project initialization interrupted. Aborting...";
+
+    let verbose = args.verbose;
+    let force = args.force;
+    let path = args.path.as_path();
+    let description = args.description.as_deref();
+    let pack_format = args.pack_format;
+
+    if !path.exists() {
+        if force {
+            fs::create_dir_all(path)?;
+        } else if let Ok(true) =
+            inquire::Confirm::new("The specified path does not exist. Do you want to create it?")
+                .with_default(true)
+                .prompt()
+        {
+            fs::create_dir_all(path)?;
+        } else {
+            print_info(ABORT_MSG);
+            return Ok(());
+        }
     } else if !path.is_dir() {
         print_error("The specified path is not a directory.");
         Err(Error::NotDirectoryError(path.to_path_buf()))?
     } else if !force && path.read_dir()?.next().is_some() {
-        print_error("The specified directory is not empty.");
-        Err(Error::NonEmptyDirectoryError(path.to_path_buf()))?
-    } else {
-        let name = args
-            .name
-            .as_deref()
-            .or_else(|| path.file_name().and_then(|os| os.to_str()));
-
-        print_info("Initializing a new Shulkerscript project...");
-
-        // Create the pack.toml file
-        create_pack_config(verbose, path, name, description, pack_format)?;
-
-        // Create the pack.png file
-        create_pack_png(path, verbose)?;
-
-        // Create the src directory
-        let src_path = path.join("src");
-        create_dir(&src_path, verbose)?;
-
-        // Create the main.shu file
-        create_main_file(
-            path,
-            &name_to_namespace(name.unwrap_or("shulkerscript-pack")),
-            verbose,
-        )?;
-
-        // Initialize the version control system
-        initalize_vcs(path, args.vcs, verbose)?;
-
-        print_success("Project initialized successfully.");
-
-        Ok(())
+        if let Ok(false) =
+            inquire::Confirm::new("The specified directory is not empty. Do you want to continue?")
+                .with_default(false)
+                .with_help_message("This may overwrite existing files in the directory.")
+                .prompt()
+        {
+            print_info(ABORT_MSG);
+            return Ok(());
+        }
     }
+
+    let mut interrupted = false;
+
+    let name = args.name.as_deref().map(Cow::Borrowed).or_else(|| {
+        let default = path
+            .file_name()
+            .and_then(|os| os.to_str())
+            .unwrap_or(PackConfig::DEFAULT_NAME);
+
+        match inquire::Text::new("Enter the name of the project:")
+            .with_help_message("This will be the name of your datapack folder/zip file")
+            .with_default(default)
+            .prompt()
+        {
+            Ok(res) => Some(Cow::Owned(res)),
+            Err(_) => {
+                interrupted = true;
+                None
+            }
+        }
+        .or_else(|| {
+            path.file_name()
+                .and_then(|os| os.to_str().map(Cow::Borrowed))
+        })
+    });
+
+    if interrupted {
+        print_info(ABORT_MSG);
+        return Ok(());
+    }
+
+    let description = description.map(Cow::Borrowed).or_else(||  {
+        match inquire::Text::new("Enter the description of the project:")
+            .with_help_message("This will be the description of your datapack, visible in the datapack selection screen")
+            .with_default(PackConfig::DEFAULT_DESCRIPTION)
+            .prompt() {
+                Ok(res) => Some(Cow::Owned(res)),
+                Err(_) => {
+                    interrupted = true;
+                    None
+                }
+            }
+    });
+
+    if interrupted {
+        print_info(ABORT_MSG);
+        return Ok(());
+    }
+
+    let pack_format = pack_format.or_else(|| {
+        match inquire::Text::new("Enter the pack format:")
+            .with_help_message("This will determine the Minecraft version compatible with your pack, find more on the Minecraft wiki")
+            .with_default(PackConfig::DEFAULT_PACK_FORMAT.to_string().as_str())
+            .prompt() {
+                Ok(res) => res.parse().ok(),
+                Err(_) => {
+                    interrupted = true;
+                    None
+                }
+            }
+    });
+
+    if interrupted {
+        print_info(ABORT_MSG);
+        return Ok(());
+    }
+
+    let vcs = args.vcs.unwrap_or_else(|| {
+        match inquire::Select::new(
+            "Select the version control system:",
+            vec![VersionControlSystem::Git, VersionControlSystem::None],
+        )
+        .with_help_message("This will initialize a version control system")
+        .prompt()
+        {
+            Ok(res) => res,
+            Err(_) => {
+                interrupted = true;
+                VersionControlSystem::Git
+            }
+        }
+    });
+
+    if interrupted {
+        print_info(ABORT_MSG);
+        return Ok(());
+    }
+
+    let icon_path = args.icon_path.as_deref().map(Cow::Borrowed).or_else(|| {
+        let autocompleter = crate::util::PathAutocomplete::new();
+        match inquire::Text::new("Enter the path of the icon file:")
+            .with_help_message(
+                "This will be the icon of your datapack, visible in the datapack selection screen [use \"-\" for default]",
+            )
+            .with_autocomplete(autocompleter)
+            .with_default("-")
+            // .with_autocomplete()
+            .prompt()
+        {
+            Ok(res) if &res == "-" => None,
+            Ok(res) => Some(Cow::Owned(PathBuf::from(res))),
+            Err(_) => {
+                interrupted = true;
+                None
+            }
+        }
+    });
+
+    if interrupted {
+        print_info(ABORT_MSG);
+        return Ok(());
+    }
+
+    print_info("Initializing a new Shulkerscript project...");
+
+    // Create the pack.toml file
+    create_pack_config(
+        verbose,
+        path,
+        name.as_deref(),
+        description.as_deref(),
+        pack_format,
+    )?;
+
+    // Create the pack.png file
+    create_pack_png(path, icon_path.as_deref(), verbose)?;
+
+    // Create the src directory
+    let src_path = path.join("src");
+    create_dir(&src_path, verbose)?;
+
+    // Create the main.shu file
+    create_main_file(
+        path,
+        &name_to_namespace(&name.unwrap_or(Cow::Borrowed("shulkerscript-pack"))),
+        verbose,
+    )?;
+
+    // Initialize the version control system
+    initalize_vcs(path, vcs, verbose)?;
+
+    print_success("Project initialized successfully.");
+
+    Ok(())
 }
 
 fn create_pack_config(
@@ -155,14 +370,29 @@ fn create_gitignore(path: &Path, verbose: bool) -> std::io::Result<()> {
     Ok(())
 }
 
-fn create_pack_png(path: &Path, verbose: bool) -> std::io::Result<()> {
-    let pack_png = path.join("pack.png");
-    fs::write(&pack_png, include_bytes!("../../assets/default-icon.png"))?;
-    if verbose {
-        print_info(format!(
-            "Created pack.png file at {}.",
-            pack_png.absolutize()?.display()
-        ));
+fn create_pack_png(
+    project_path: &Path,
+    icon_path: Option<&Path>,
+    verbose: bool,
+) -> std::io::Result<()> {
+    let pack_png = project_path.join("pack.png");
+    if let Some(icon_path) = icon_path {
+        fs::copy(icon_path, &pack_png)?;
+        if verbose {
+            print_info(format!(
+                "Copied pack.png file from {} to {}.",
+                icon_path.absolutize()?.display(),
+                pack_png.absolutize()?.display()
+            ));
+        }
+    } else {
+        fs::write(&pack_png, include_bytes!("../../assets/default-icon.png"))?;
+        if verbose {
+            print_info(format!(
+                "Created pack.png file at {}.",
+                pack_png.absolutize()?.display()
+            ));
+        }
     }
     Ok(())
 }

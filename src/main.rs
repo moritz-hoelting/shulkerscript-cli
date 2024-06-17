@@ -3,6 +3,7 @@ mod config;
 mod error;
 mod subcommands;
 mod terminal_output;
+mod util;
 
 use std::process::ExitCode;
 

@@ -18,8 +18,10 @@ Where [PATH] is the path of the folder to initialize in [default: `.`]
 Options:
 - `--name <NAME>`                The name of the project
 - `--description <DESCRIPTION>`  The description of the project
-- `--pack-format <FORMAT>`  The pack format version
+- `--pack-format <FORMAT>`       The pack format version
+- `--icon <PATH>`                The path to the icon file, leave empty for default icon
 - `--force`                      Force initialization even if the directory is not empty
+- `--batch`                      Do not prompt for input, use default values instead if possible or fail
 
 ### Build a project
 ```bash

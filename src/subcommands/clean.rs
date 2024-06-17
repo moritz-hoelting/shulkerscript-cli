@@ -21,7 +21,7 @@ pub struct CleanArgs {
     pub force: bool,
     /// Enable verbose output.
     #[arg(short, long)]
-    verbose: bool,
+    pub verbose: bool,
 }
 
 pub fn clean(args: &CleanArgs) -> Result<()> {

@@ -12,28 +12,26 @@ pub struct ProjectConfig {
 pub struct PackConfig {
     pub name: String,
     pub description: String,
-    #[serde(
-        rename = "format",
-        alias = "pack_format",
-        default = "default_pack_format"
-    )]
+    #[serde(rename = "format", alias = "pack_format")]
     pub pack_format: u8,
     pub version: String,
+}
+
+impl PackConfig {
+    pub const DEFAULT_NAME: &'static str = "shulkerscript-pack";
+    pub const DEFAULT_DESCRIPTION: &'static str = "A Minecraft datapack created with shulkerscript";
+    pub const DEFAULT_PACK_FORMAT: u8 = 48;
 }
 
 impl Default for PackConfig {
     fn default() -> Self {
         Self {
-            name: "shulkerscript-pack".to_string(),
-            description: "A Minecraft datapack created with shulkerscript".to_string(),
-            pack_format: 26,
+            name: Self::DEFAULT_NAME.to_string(),
+            description: Self::DEFAULT_DESCRIPTION.to_string(),
+            pack_format: Self::DEFAULT_PACK_FORMAT,
             version: "0.1.0".to_string(),
         }
     }
-}
-
-fn default_pack_format() -> u8 {
-    26
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
