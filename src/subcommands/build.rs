@@ -16,21 +16,21 @@ use std::{
 #[derive(Debug, clap::Args, Clone)]
 pub struct BuildArgs {
     /// The path of the project to build.
-    #[clap(default_value = ".")]
+    #[arg(default_value = ".")]
     pub path: PathBuf,
     /// Path of output directory
     ///
     /// The path of the directory to place the compiled datapack.
-    #[clap(short, long, env = "DATAPACK_DIR")]
+    #[arg(short, long, env = "DATAPACK_DIR")]
     pub output: Option<PathBuf>,
     /// Path of the assets folder
     ///
     /// The path of a folder which files and subfolders will be copied to the root of the datapack.
     /// Overrides the `assets` field in the pack.toml file.
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub assets: Option<PathBuf>,
     /// Package the project to a zip file.
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub zip: bool,
 }
 

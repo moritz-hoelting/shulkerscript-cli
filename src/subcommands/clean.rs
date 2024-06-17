@@ -8,19 +8,19 @@ use crate::terminal_output::{print_error, print_info, print_success};
 #[derive(Debug, clap::Args, Clone)]
 pub struct CleanArgs {
     /// The path of the project to clean.
-    #[clap(default_value = ".")]
+    #[arg(default_value = ".")]
     pub path: PathBuf,
     /// The path of the directory where the compiled datapacks are placed.
-    #[clap(short, long, env = "DATAPACK_DIR")]
+    #[arg(short, long, env = "DATAPACK_DIR")]
     pub output: Option<PathBuf>,
     /// Clean the whole output folder
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub all: bool,
     /// Force clean
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub force: bool,
     /// Enable verbose output.
-    #[clap(short, long)]
+    #[arg(short, long)]
     verbose: bool,
 }
 

@@ -6,15 +6,15 @@ use std::path::PathBuf;
 #[derive(Debug, clap::Args, Clone)]
 pub struct LangDebugArgs {
     /// The path of the project to compile.
-    #[clap(default_value = ".")]
+    #[arg(default_value = ".")]
     pub path: PathBuf,
     /// The state to dump.
     ///
     /// Output can be the raw tokens, the abstract syntax tree, or the transpiled datapack.
-    #[clap(short, long, value_name = "STATE", default_value = "ast")]
+    #[arg(short, long, value_name = "STATE", default_value = "ast")]
     pub dump: DumpState,
     /// Pretty-print the output.
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub pretty: bool,
 }
 

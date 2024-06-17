@@ -13,7 +13,7 @@ pub struct Args {
     /// Enable tracing output
     ///
     /// When specified without a value, defaults to `info`.
-    #[clap(
+    #[arg(
         long,
         global = true,
         default_missing_value = "info",

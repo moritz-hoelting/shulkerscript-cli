@@ -19,25 +19,25 @@ use crate::{
 #[derive(Debug, clap::Args, Clone)]
 pub struct InitArgs {
     /// The path of the folder to initialize in.
-    #[clap(default_value = ".")]
+    #[arg(default_value = ".")]
     pub path: PathBuf,
     /// The name of the project.
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub name: Option<String>,
     /// The description of the project.
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub description: Option<String>,
     /// The pack format version.
-    #[clap(short, long, value_name = "FORMAT")]
+    #[arg(short, long, value_name = "FORMAT")]
     pub pack_format: Option<u8>,
     /// Force initialization even if the directory is not empty.
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub force: bool,
     /// The version control system to initialize.
-    #[clap(long, default_value = "git")]
+    #[arg(long, default_value = "git")]
     pub vcs: VersionControlSystem,
     /// Enable verbose output.
-    #[clap(short, long)]
+    #[arg(short, long)]
     verbose: bool,
 }
 
