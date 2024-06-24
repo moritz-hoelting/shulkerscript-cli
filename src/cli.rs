@@ -1,7 +1,7 @@
 use crate::subcommands::{self, BuildArgs, CleanArgs, InitArgs};
 
+use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
-use color_eyre::eyre::Result;
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 
@@ -54,7 +54,7 @@ pub enum TracingLevel {
 impl Args {
     pub fn run(&self) -> Result<()> {
         if let Some(level) = self.trace {
-            setup_tracing(level);
+            setup_tracing(level)?;
         }
 
         self.cmd.run()
@@ -89,7 +89,7 @@ impl From<TracingLevel> for Level {
     }
 }
 
-fn setup_tracing(level: TracingLevel) {
+fn setup_tracing(level: TracingLevel) -> Result<()> {
     // a builder for `FmtSubscriber`.
     let subscriber = FmtSubscriber::builder()
         // all spans/events with a level higher than TRACE (e.g, debug, info, warn, etc.)
@@ -98,7 +98,9 @@ fn setup_tracing(level: TracingLevel) {
         // completes the builder.
         .finish();
 
-    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+    tracing::subscriber::set_global_default(subscriber)?;
+
+    Ok(())
 }
 
 #[cfg(test)]

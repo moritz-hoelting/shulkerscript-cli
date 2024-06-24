@@ -5,8 +5,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use anyhow::Result;
 use clap::ValueEnum;
-use color_eyre::eyre::Result;
 use git2::{
     IndexAddOption as GitIndexAddOption, Repository as GitRepository, Signature as GitSignature,
 };
@@ -143,28 +143,36 @@ fn initialize_interactive(args: &InitArgs) -> Result<()> {
     if !path.exists() {
         if force {
             fs::create_dir_all(path)?;
-        } else if let Ok(true) =
-            inquire::Confirm::new("The specified path does not exist. Do you want to create it?")
-                .with_default(true)
-                .prompt()
-        {
-            fs::create_dir_all(path)?;
         } else {
-            print_info(ABORT_MSG);
-            return Ok(());
+            match inquire::Confirm::new(
+                "The specified path does not exist. Do you want to create it?",
+            )
+            .with_default(true)
+            .prompt()
+            {
+                Ok(true) => fs::create_dir_all(path)?,
+                Ok(false) | Err(_) => {
+                    print_info(ABORT_MSG);
+                    return Err(inquire::InquireError::OperationCanceled.into());
+                }
+            }
         }
     } else if !path.is_dir() {
         print_error("The specified path is not a directory.");
         Err(Error::NotDirectoryError(path.to_path_buf()))?
     } else if !force && path.read_dir()?.next().is_some() {
-        if let Ok(false) =
-            inquire::Confirm::new("The specified directory is not empty. Do you want to continue?")
-                .with_default(false)
-                .with_help_message("This may overwrite existing files in the directory.")
-                .prompt()
+        match inquire::Confirm::new(
+            "The specified directory is not empty. Do you want to continue?",
+        )
+        .with_default(false)
+        .with_help_message("This may overwrite existing files in the directory.")
+        .prompt()
         {
-            print_info(ABORT_MSG);
-            return Ok(());
+            Ok(false) | Err(_) => {
+                print_info(ABORT_MSG);
+                return Err(inquire::InquireError::OperationCanceled.into());
+            }
+            Ok(true) => {}
         }
     }
 
@@ -195,7 +203,7 @@ fn initialize_interactive(args: &InitArgs) -> Result<()> {
 
     if interrupted {
         print_info(ABORT_MSG);
-        return Ok(());
+        return Err(inquire::InquireError::OperationCanceled.into());
     }
 
     let description = description.map(Cow::Borrowed).or_else(||  {
@@ -213,7 +221,7 @@ fn initialize_interactive(args: &InitArgs) -> Result<()> {
 
     if interrupted {
         print_info(ABORT_MSG);
-        return Ok(());
+        return Err(inquire::InquireError::OperationCanceled.into());
     }
 
     let pack_format = pack_format.or_else(|| {
@@ -231,7 +239,7 @@ fn initialize_interactive(args: &InitArgs) -> Result<()> {
 
     if interrupted {
         print_info(ABORT_MSG);
-        return Ok(());
+        return Err(inquire::InquireError::OperationCanceled.into());
     }
 
     let vcs = args.vcs.unwrap_or_else(|| {
@@ -252,7 +260,7 @@ fn initialize_interactive(args: &InitArgs) -> Result<()> {
 
     if interrupted {
         print_info(ABORT_MSG);
-        return Ok(());
+        return Err(inquire::InquireError::OperationCanceled.into());
     }
 
     let icon_path = args.icon_path.as_deref().map(Cow::Borrowed).or_else(|| {
@@ -277,7 +285,7 @@ fn initialize_interactive(args: &InitArgs) -> Result<()> {
 
     if interrupted {
         print_info(ABORT_MSG);
-        return Ok(());
+        return Err(inquire::InquireError::OperationCanceled.into());
     }
 
     print_info("Initializing a new Shulkerscript project...");

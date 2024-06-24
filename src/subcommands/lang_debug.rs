@@ -1,7 +1,10 @@
 use clap::ValueEnum;
 
-use color_eyre::eyre::Result;
+use anyhow::Result;
+use shulkerscript::base::FsProvider;
 use std::path::PathBuf;
+
+use crate::config::PackConfig;
 
 #[derive(Debug, clap::Args, Clone)]
 pub struct LangDebugArgs {
@@ -27,9 +30,10 @@ pub enum DumpState {
 }
 
 pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
+    let file_provider = FsProvider::default();
     match args.dump {
         DumpState::Tokens => {
-            let tokens = shulkerscript::tokenize(&args.path)?;
+            let tokens = shulkerscript::tokenize(&file_provider, &args.path)?;
             if args.pretty {
                 println!("{:#?}", tokens);
             } else {
@@ -37,7 +41,7 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
             }
         }
         DumpState::Ast => {
-            let ast = shulkerscript::parse(&args.path)?;
+            let ast = shulkerscript::parse(&file_provider, &args.path)?;
             if args.pretty {
                 println!("{:#?}", ast);
             } else {
@@ -46,7 +50,11 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
         }
         DumpState::Datapack => {
             let program_paths = super::build::get_script_paths(&args.path.join("src"))?;
-            let datapack = shulkerscript::transpile(&program_paths)?;
+            let datapack = shulkerscript::transpile(
+                &file_provider,
+                PackConfig::DEFAULT_PACK_FORMAT,
+                &program_paths,
+            )?;
             if args.pretty {
                 println!("{:#?}", datapack);
             } else {

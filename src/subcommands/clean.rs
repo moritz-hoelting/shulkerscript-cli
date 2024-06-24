@@ -1,6 +1,6 @@
 use std::{borrow::Cow, path::PathBuf};
 
-use color_eyre::eyre::Result;
+use anyhow::Result;
 use path_absolutize::Absolutize;
 
 use crate::terminal_output::{print_error, print_info, print_success};

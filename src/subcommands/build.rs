@@ -1,6 +1,10 @@
-use color_eyre::eyre::{Report, Result};
+use anyhow::Result;
 use path_absolutize::Absolutize;
-use shulkerbox::virtual_fs::{VFile, VFolder};
+use shulkerbox::{
+    util::compile::CompileOptions,
+    virtual_fs::{VFile, VFolder},
+};
+use shulkerscript::base::FsProvider;
 
 use crate::{
     config::ProjectConfig,
@@ -32,25 +36,15 @@ pub struct BuildArgs {
     /// Package the project to a zip file.
     #[arg(short, long)]
     pub zip: bool,
-}
-
-impl Default for BuildArgs {
-    fn default() -> Self {
-        Self {
-            path: PathBuf::from("."),
-            output: None,
-            assets: None,
-            zip: false,
-        }
-    }
+    /// Skip validating the project for pack format compatibility.
+    #[arg(long)]
+    pub no_validate: bool,
 }
 
 pub fn build(args: &BuildArgs) -> Result<()> {
     if args.zip && !cfg!(feature = "zip") {
         print_error("The zip feature is not enabled. Please install with the `zip` feature enabled to use the `--zip` option.");
-        return Err(Report::from(Error::FeatureNotEnabledError(
-            "zip".to_string(),
-        )));
+        return Err(Error::FeatureNotEnabledError("zip".to_string()).into());
     }
 
     let path = args.path.as_path();
@@ -76,7 +70,21 @@ pub fn build(args: &BuildArgs) -> Result<()> {
             .join("src"),
     )?;
 
-    let mut compiled = shulkerscript::compile(&script_paths)?;
+    let datapack = shulkerscript::transpile(
+        &FsProvider::default(),
+        project_config.pack.pack_format,
+        &script_paths,
+    )?;
+
+    if !args.no_validate && !datapack.validate() {
+        print_warning(format!(
+            "The datapack is not compatible with the specified pack format: {}",
+            project_config.pack.pack_format
+        ));
+        return Err(Error::IncompatiblePackVersionError.into());
+    }
+
+    let mut compiled = datapack.compile(&CompileOptions::default());
 
     let icon_path = toml_path.parent().unwrap().join("pack.png");
 
@@ -120,7 +128,13 @@ pub fn build(args: &BuildArgs) -> Result<()> {
 
     #[cfg(feature = "zip")]
     if args.zip {
-        output.zip(&dist_path)?;
+        output.zip_with_comment(
+            &dist_path,
+            format!(
+                "{} - v{}",
+                &project_config.pack.description, &project_config.pack.version
+            ),
+        )?;
     } else {
         output.place(&dist_path)?;
     }

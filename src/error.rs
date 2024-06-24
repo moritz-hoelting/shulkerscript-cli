@@ -13,6 +13,8 @@ pub enum Error {
     InvalidPackPathError(PathBuf),
     #[error("An error occured because the feature {0} is not enabled.")]
     FeatureNotEnabledError(String),
+    #[error("An error occured because the pack version does not support a used feature")]
+    IncompatiblePackVersionError,
 }
 
 #[allow(dead_code)]

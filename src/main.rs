@@ -1,18 +1,14 @@
-mod cli;
-mod config;
-mod error;
-mod subcommands;
-mod terminal_output;
-mod util;
-
 use std::process::ExitCode;
 
 use clap::Parser;
-use cli::Args;
+
+use shulkerscript_cli::{cli::Args, terminal_output::print_info};
 
 fn main() -> ExitCode {
-    color_eyre::install().unwrap();
-    let _ = dotenvy::dotenv();
+    human_panic::setup_panic!();
+    if dotenvy::dotenv().is_ok() {
+        print_info("Using environment variables from .env file");
+    }
 
     let args = Args::parse();
 

@@ -32,6 +32,7 @@ Where [PATH] is the path of the project folder to build [default: `.`]
 Options:
 - `--assets <ASSETS>`  The path to the assets directory [default: `./assets`]
 - `--output <OUTPUT>`  The output directory, overrides the `DATAPACK_DIR` environment variable
+- `--no-validate`      Do not validate the output to be compatible with the pack format
 - `--zip`              Package the output into a zip file
 
 Environment variables:
