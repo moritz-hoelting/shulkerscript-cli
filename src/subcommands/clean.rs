@@ -1,9 +1,12 @@
 use std::{borrow::Cow, path::PathBuf};
 
 use anyhow::Result;
-use path_absolutize::Absolutize;
+use path_absolutize::Absolutize as _;
 
-use crate::terminal_output::{print_error, print_info, print_success};
+use crate::{
+    terminal_output::{print_error, print_info, print_success},
+    util,
+};
 
 #[derive(Debug, clap::Args, Clone)]
 pub struct CleanArgs {
@@ -26,7 +29,7 @@ pub struct CleanArgs {
 
 pub fn clean(args: &CleanArgs) -> Result<()> {
     let verbose = args.verbose;
-    let path = args.path.as_path();
+    let path = util::get_project_path(&args.path).unwrap_or(args.path.clone());
     let dist_path = args
         .output
         .as_ref()
@@ -35,7 +38,7 @@ pub fn clean(args: &CleanArgs) -> Result<()> {
 
     let mut delete_paths = Vec::new();
 
-    let (project_config, _) = super::build::get_pack_config(path)?;
+    let (project_config, _) = super::build::get_pack_config(&path)?;
 
     if args.all {
         if args.force {
@@ -50,7 +53,7 @@ pub fn clean(args: &CleanArgs) -> Result<()> {
 
     print_info(format!(
         "Cleaning project at {}",
-        path.absolutize_from(path)?.display()
+        path.absolutize_from(&path)?.display()
     ));
 
     for delete_path in delete_paths {

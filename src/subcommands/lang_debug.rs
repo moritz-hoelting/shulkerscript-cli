@@ -4,7 +4,7 @@ use anyhow::Result;
 use shulkerscript::base::FsProvider;
 use std::path::PathBuf;
 
-use crate::config::PackConfig;
+use crate::{config::PackConfig, util};
 
 #[derive(Debug, clap::Args, Clone)]
 pub struct LangDebugArgs {
@@ -49,7 +49,11 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
             }
         }
         DumpState::Datapack => {
-            let program_paths = super::build::get_script_paths(&args.path.join("src"))?;
+            let program_paths = super::build::get_script_paths(
+                &util::get_project_path(&args.path)
+                    .unwrap_or(args.path.clone())
+                    .join("src"),
+            )?;
             let datapack = shulkerscript::transpile(
                 &file_provider,
                 PackConfig::DEFAULT_PACK_FORMAT,

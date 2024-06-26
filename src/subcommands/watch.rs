@@ -7,12 +7,14 @@ use std::{
 };
 
 use clap::Parser;
+use colored::Colorize;
 use notify_debouncer_mini::{new_debouncer, notify::*, DebounceEventResult};
 
 use crate::{
     cli::Args,
     error::Result,
     terminal_output::{print_error, print_info, print_warning},
+    util,
 };
 
 #[derive(Debug, clap::Args, Clone)]
@@ -57,7 +59,12 @@ pub struct WatchArgs {
 }
 
 pub fn watch(args: &WatchArgs) -> Result<()> {
-    print_info(format!("Watching project at {}", args.path.display()));
+    let path = util::get_project_path(&args.path).unwrap_or(args.path.clone());
+    print_info(format!("Watching project at {}", path.display()));
+    print_info(format!(
+        "Press {} to stop watching",
+        "Ctrl-C".underline().blue()
+    ));
 
     let commands = args
         .execute
@@ -78,9 +85,7 @@ pub fn watch(args: &WatchArgs) -> Result<()> {
         env::current_dir().ok()
     };
 
-    if !args.no_inital
-        && (current_dir.is_none() || env::set_current_dir(args.path.as_path()).is_err())
-    {
+    if !args.no_inital && (current_dir.is_none() || env::set_current_dir(&path).is_err()) {
         print_warning("Failed to change working directory to project path. Commands may not work.");
     }
 
@@ -114,28 +119,25 @@ pub fn watch(args: &WatchArgs) -> Result<()> {
         env::set_current_dir(prev_cwd).expect("Failed to change working directory back");
     }
 
-    let assets_path = super::build::get_pack_config(&args.path)
+    let assets_path = super::build::get_pack_config(&path)
         .ok()
         .and_then(|(conf, _)| conf.compiler.and_then(|c| c.assets));
 
     let watcher = debouncer.watcher();
     watcher
-        .watch(args.path.join("src").as_path(), RecursiveMode::Recursive)
+        .watch(path.join("src").as_path(), RecursiveMode::Recursive)
         .expect("Failed to watch project src");
     watcher
-        .watch(
-            args.path.join("pack.png").as_path(),
-            RecursiveMode::NonRecursive,
-        )
+        .watch(path.join("pack.png").as_path(), RecursiveMode::NonRecursive)
         .expect("Failed to watch project pack.png");
     watcher
         .watch(
-            args.path.join("pack.toml").as_path(),
+            path.join("pack.toml").as_path(),
             RecursiveMode::NonRecursive,
         )
         .expect("Failed to watch project pack.toml");
     if let Some(assets_path) = assets_path {
-        let full_assets_path = args.path.join(assets_path);
+        let full_assets_path = path.join(assets_path);
         if full_assets_path.exists() {
             watcher
                 .watch(full_assets_path.as_path(), RecursiveMode::Recursive)
@@ -147,7 +149,7 @@ pub fn watch(args: &WatchArgs) -> Result<()> {
     for path in args.watch.iter() {
         if path.exists() {
             watcher
-                .watch(path.as_path(), RecursiveMode::Recursive)
+                .watch(path, RecursiveMode::Recursive)
                 .expect("Failed to watch custom path");
         } else {
             print_warning(format!(
@@ -157,7 +159,7 @@ pub fn watch(args: &WatchArgs) -> Result<()> {
         }
     }
 
-    if env::set_current_dir(args.path.as_path()).is_err() {
+    if env::set_current_dir(path).is_err() {
         print_warning("Failed to change working directory to project path. Commands may not work.");
     }
 

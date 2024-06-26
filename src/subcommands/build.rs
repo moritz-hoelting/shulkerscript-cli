@@ -10,6 +10,7 @@ use crate::{
     config::ProjectConfig,
     error::Error,
     terminal_output::{print_error, print_info, print_success, print_warning},
+    util,
 };
 use std::{
     borrow::Cow,
@@ -47,7 +48,7 @@ pub fn build(args: &BuildArgs) -> Result<()> {
         return Err(Error::FeatureNotEnabledError("zip".to_string()).into());
     }
 
-    let path = args.path.as_path();
+    let path = util::get_project_path(&args.path).unwrap_or(args.path.clone());
     let dist_path = args
         .output
         .as_ref()
@@ -56,12 +57,16 @@ pub fn build(args: &BuildArgs) -> Result<()> {
 
     let and_package_msg = if args.zip { " and packaging" } else { "" };
 
+    let mut path_display = format!("{}", path.display());
+    if path_display.is_empty() {
+        path_display.push('.');
+    }
+
     print_info(format!(
-        "Building{and_package_msg} project at {}",
-        path.absolutize()?.display()
+        "Building{and_package_msg} project at {path_display}"
     ));
 
-    let (project_config, toml_path) = get_pack_config(path)?;
+    let (project_config, toml_path) = get_pack_config(&path)?;
 
     let script_paths = get_script_paths(
         &toml_path
@@ -198,6 +203,7 @@ fn _get_script_paths(path: &Path, prefix: &str) -> std::io::Result<Vec<(String, 
 /// - If the specified path does not exist.
 /// - If the specified directory does not contain a pack.toml file.
 pub(super) fn get_pack_config(path: &Path) -> Result<(ProjectConfig, PathBuf)> {
+    let path = path.absolutize()?;
     let toml_path = if !path.exists() {
         print_error("The specified path does not exist.");
         return Err(Error::PathNotFoundError(path.to_path_buf()))?;

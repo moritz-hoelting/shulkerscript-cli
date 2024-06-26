@@ -43,3 +43,4 @@ inquire = { git = "https://github.com/moritz-hoelting/rust-inquire.git", branch 
 camino = "1.1.7"
 human-panic = "2.0.0"
 anyhow = "1.0.86"
+pathdiff = "0.2.1"

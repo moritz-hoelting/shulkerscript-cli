@@ -1,8 +1,37 @@
-use std::collections::HashMap;
+use std::{
+    borrow::Cow,
+    collections::HashMap,
+    env,
+    path::{Path, PathBuf},
+};
 
 use camino::Utf8PathBuf;
 
 use inquire::{autocompletion::Replacement, Autocomplete};
+use path_absolutize::Absolutize;
+
+pub fn get_project_path<P>(base_path: P) -> Option<PathBuf>
+where
+    P: AsRef<Path>,
+{
+    let base_path = base_path.as_ref();
+    if base_path.is_absolute() {
+        Cow::Borrowed(base_path)
+    } else {
+        base_path.absolutize().ok()?
+    }
+    .ancestors()
+    .find(|p| p.join("pack.toml").exists())
+    .map(|p| relativize(p).unwrap_or_else(|| p.to_path_buf()))
+}
+
+pub fn relativize<P>(path: P) -> Option<PathBuf>
+where
+    P: AsRef<Path>,
+{
+    let cwd = env::current_dir().ok()?;
+    pathdiff::diff_paths(path, cwd)
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct PathAutocomplete {
