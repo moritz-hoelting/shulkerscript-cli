@@ -1,7 +1,7 @@
 use clap::ValueEnum;
 
 use anyhow::Result;
-use shulkerscript::base::FsProvider;
+use shulkerscript::base::{FsProvider, PrintHandler};
 use std::path::PathBuf;
 
 use crate::{config::PackConfig, util};
@@ -33,7 +33,14 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
     let file_provider = FsProvider::default();
     match args.dump {
         DumpState::Tokens => {
-            let tokens = shulkerscript::tokenize(&file_provider, &args.path)?;
+            let tokens = shulkerscript::tokenize(
+                &PrintHandler::new(),
+                &file_provider,
+                &args.path,
+                args.path.file_stem().map_or(String::from("main"), |s| {
+                    s.to_string_lossy().into_owned().to_string()
+                }),
+            )?;
             if args.pretty {
                 println!("{:#?}", tokens);
             } else {
@@ -41,7 +48,14 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
             }
         }
         DumpState::Ast => {
-            let ast = shulkerscript::parse(&file_provider, &args.path)?;
+            let ast = shulkerscript::parse(
+                &PrintHandler::new(),
+                &file_provider,
+                &args.path,
+                args.path.file_stem().map_or(String::from("main"), |s| {
+                    s.to_string_lossy().into_owned().to_string()
+                }),
+            )?;
             if args.pretty {
                 println!("{:#?}", ast);
             } else {
@@ -55,6 +69,7 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
                     .join("src"),
             )?;
             let datapack = shulkerscript::transpile(
+                &PrintHandler::new(),
                 &file_provider,
                 PackConfig::DEFAULT_PACK_FORMAT,
                 &program_paths,

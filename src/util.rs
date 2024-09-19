@@ -5,8 +5,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use camino::Utf8PathBuf;
-
 use inquire::{autocompletion::Replacement, Autocomplete};
 use path_absolutize::Absolutize;
 
@@ -68,17 +66,20 @@ impl PathAutocomplete {
         if !self.cache.contains_key(parent) {
             tracing::trace!("Cache miss for \"{}\", reading dir", parent);
 
-            let parent_path = Utf8PathBuf::from(parent);
+            let parent_path = PathBuf::from(parent);
             if !parent_path.exists() || !parent_path.is_dir() {
                 return Err("Path does not exist");
             }
 
             let entries = parent_path
-                .read_dir_utf8()
+                .read_dir()
                 .map_err(|_| "Could not read dir")?
                 .filter_map(|entry| {
-                    entry.ok().map(|entry| {
-                        entry.file_name().to_string() + if entry.path().is_dir() { "/" } else { "" }
+                    entry.ok().and_then(|entry| {
+                        Some(
+                            entry.file_name().into_string().ok()?.to_string()
+                                + if entry.path().is_dir() { "/" } else { "" },
+                        )
                     })
                 })
                 .collect::<Vec<_>>();

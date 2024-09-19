@@ -2,11 +2,18 @@ use crate::subcommands::{self, BuildArgs, CleanArgs, InitArgs};
 
 use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
+use const_format::formatcp;
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 
+static VERSION: &str = formatcp!(
+    "v{cli_version}\nshulkerscript-lang v{lang_version}",
+    cli_version = env!("CARGO_PKG_VERSION"),
+    lang_version = shulkerscript::VERSION
+);
+
 #[derive(Debug, Clone, Parser)]
-#[command(version, about, long_about = None)]
+#[command(version, about, long_about = None, disable_version_flag = false, version = VERSION)]
 pub struct Args {
     #[command(subcommand)]
     cmd: Command,

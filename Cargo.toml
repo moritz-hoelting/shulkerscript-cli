@@ -24,13 +24,13 @@ watch = ["dep:notify-debouncer-mini", "dep:ctrlc"]
 zip = ["shulkerbox/zip"]
 
 [dependencies]
-clap = { version = "4.5.4", features = ["derive", "env", "deprecated"] }
+clap = { version = "4.5.4", features = ["deprecated", "derive", "env"] }
 colored = "2.1.0"
 serde = { version = "1.0.197", features = ["derive"] }
 thiserror = "1.0.58"
 toml = "0.8.12"
-shulkerscript = { git = "https://github.com/moritz-hoelting/shulkerscript-lang.git", features = ["shulkerbox"], default-features = false, rev = "a0a27cda96e1922b019b216961c39f7ef7991d22" }
-shulkerbox = { git = "https://github.com/moritz-hoelting/shulkerbox.git", default-features = false, rev = "a2d20dab8ea97bbd873edafb23afaad34292457f" }
+shulkerscript = { git = "https://github.com/moritz-hoelting/shulkerscript-lang.git", features = ["fs_access", "shulkerbox"], default-features = false, rev = "0cccee936e427d8ac2238956d2ef7b240d568e13" }
+shulkerbox = { git = "https://github.com/moritz-hoelting/shulkerbox.git", default-features = false, rev = "aff342a64a94981af942223345b5a5f105212957" }
 git2 = { version = "0.19.0", default-features = false }
 path-absolutize = "3.1.1"
 dotenvy = "0.15.7"
@@ -40,7 +40,7 @@ tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 # waiting for pull request to be merged
 inquire = { git = "https://github.com/moritz-hoelting/rust-inquire.git", branch = "main", package = "inquire" }
-camino = "1.1.7"
 human-panic = "2.0.0"
 anyhow = "1.0.86"
 pathdiff = "0.2.1"
+const_format = "0.2.32"
