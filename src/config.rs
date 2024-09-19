@@ -20,7 +20,7 @@ pub struct PackConfig {
 impl PackConfig {
     pub const DEFAULT_NAME: &'static str = "shulkerscript-pack";
     pub const DEFAULT_DESCRIPTION: &'static str = "A Minecraft datapack created with shulkerscript";
-    pub const DEFAULT_PACK_FORMAT: u8 = 48;
+    pub const DEFAULT_PACK_FORMAT: u8 = shulkerbox::datapack::Datapack::LATEST_FORMAT;
 }
 
 impl Default for PackConfig {

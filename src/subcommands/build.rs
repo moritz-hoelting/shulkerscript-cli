@@ -4,7 +4,7 @@ use shulkerbox::{
     util::compile::CompileOptions,
     virtual_fs::{VFile, VFolder},
 };
-use shulkerscript::base::FsProvider;
+use shulkerscript::base::{FsProvider, PrintHandler};
 
 use crate::{
     config::ProjectConfig,
@@ -76,6 +76,7 @@ pub fn build(args: &BuildArgs) -> Result<()> {
     )?;
 
     let datapack = shulkerscript::transpile(
+        &PrintHandler::new(),
         &FsProvider::default(),
         project_config.pack.pack_format,
         &script_paths,
