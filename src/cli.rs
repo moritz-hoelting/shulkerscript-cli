@@ -40,12 +40,15 @@ pub enum Command {
     /// Clean build artifacts.
     /// This will remove the `dist` directory.
     Clean(CleanArgs),
-    #[cfg(feature = "watch")]
-    /// Watch for changes and execute commands.
-    Watch(subcommands::WatchArgs),
     #[cfg(feature = "lang-debug")]
     /// Build the project and dump the intermediate state.
     LangDebug(subcommands::LangDebugArgs),
+    #[cfg(feature = "migrate")]
+    /// Migrate a regular datapack to a ShulkerScript project.
+    Migrate(subcommands::MigrateArgs),
+    #[cfg(feature = "watch")]
+    /// Watch for changes and execute commands.
+    Watch(subcommands::WatchArgs),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, ValueEnum)]
@@ -74,10 +77,12 @@ impl Command {
             Command::Init(args) => subcommands::init(args)?,
             Command::Build(args) => subcommands::build(args)?,
             Command::Clean(args) => subcommands::clean(args)?,
-            #[cfg(feature = "watch")]
-            Command::Watch(args) => subcommands::watch(args)?,
             #[cfg(feature = "lang-debug")]
             Command::LangDebug(args) => subcommands::lang_debug(args)?,
+            #[cfg(feature = "migrate")]
+            Command::Migrate(args) => subcommands::migrate(args)?,
+            #[cfg(feature = "watch")]
+            Command::Watch(args) => subcommands::watch(args)?,
         }
 
         Ok(())

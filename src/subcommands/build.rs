@@ -41,7 +41,7 @@ pub struct BuildArgs {
     #[arg(long)]
     pub no_validate: bool,
     /// Check if the project can be built without actually building it.
-    #[arg(long)]
+    #[arg(long, conflicts_with_all = ["output", "zip"])]
     pub check: bool,
 }
 
