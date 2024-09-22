@@ -40,6 +40,9 @@ pub struct BuildArgs {
     /// Skip validating the project for pack format compatibility.
     #[arg(long)]
     pub no_validate: bool,
+    /// Check if the project can be built without actually building it.
+    #[arg(long)]
+    pub check: bool,
 }
 
 pub fn build(args: &BuildArgs) -> Result<()> {
@@ -132,26 +135,30 @@ pub fn build(args: &BuildArgs) -> Result<()> {
 
     let dist_path = dist_path.join(project_config.pack.name + dist_extension);
 
-    #[cfg(feature = "zip")]
-    if args.zip {
-        output.zip_with_comment(
-            &dist_path,
-            format!(
-                "{} - v{}",
-                &project_config.pack.description, &project_config.pack.version
-            ),
-        )?;
+    if args.check {
+        print_success("Project is valid and can be built.");
     } else {
+        #[cfg(feature = "zip")]
+        if args.zip {
+            output.zip_with_comment(
+                &dist_path,
+                format!(
+                    "{} - v{}",
+                    &project_config.pack.description, &project_config.pack.version
+                ),
+            )?;
+        } else {
+            output.place(&dist_path)?;
+        }
+
+        #[cfg(not(feature = "zip"))]
         output.place(&dist_path)?;
+
+        print_success(format!(
+            "Finished building{and_package_msg} project to {}",
+            dist_path.absolutize_from(path)?.display()
+        ));
     }
-
-    #[cfg(not(feature = "zip"))]
-    output.place(&dist_path)?;
-
-    print_success(format!(
-        "Finished building{and_package_msg} project to {}",
-        dist_path.absolutize_from(path)?.display()
-    ));
 
     Ok(())
 }

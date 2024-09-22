@@ -24,23 +24,23 @@ watch = ["dep:notify-debouncer-mini", "dep:ctrlc"]
 zip = ["shulkerbox/zip"]
 
 [dependencies]
-clap = { version = "4.5.4", features = ["deprecated", "derive", "env"] }
+anyhow = "1.0.89"
+clap = { version = "4.5.18", features = ["deprecated", "derive", "env"] }
 colored = "2.1.0"
-serde = { version = "1.0.197", features = ["derive"] }
-thiserror = "1.0.58"
-toml = "0.8.12"
-shulkerscript = { git = "https://github.com/moritz-hoelting/shulkerscript-lang.git", features = ["fs_access", "shulkerbox"], default-features = false, rev = "0cccee936e427d8ac2238956d2ef7b240d568e13" }
-shulkerbox = { git = "https://github.com/moritz-hoelting/shulkerbox.git", default-features = false, rev = "aff342a64a94981af942223345b5a5f105212957" }
-git2 = { version = "0.19.0", default-features = false }
-path-absolutize = "3.1.1"
+const_format = "0.2.33"
+ctrlc = { version = "3.4.5", optional = true }
 dotenvy = "0.15.7"
-notify-debouncer-mini = { version = "0.4.1", default-features = false, optional = true }
-ctrlc = { version = "3.4.4", optional = true }
-tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
+git2 = { version = "0.19.0", default-features = false }
+human-panic = "2.0.1"
 # waiting for pull request to be merged
 inquire = { git = "https://github.com/moritz-hoelting/rust-inquire.git", branch = "main", package = "inquire" }
-human-panic = "2.0.0"
-anyhow = "1.0.86"
+notify-debouncer-mini = { version = "0.4.1", default-features = false, optional = true }
+path-absolutize = "3.1.1"
 pathdiff = "0.2.1"
-const_format = "0.2.32"
+serde = { version = "1.0.210", features = ["derive"] }
+shulkerbox = { git = "https://github.com/moritz-hoelting/shulkerbox.git", default-features = false, rev = "4ca0505e357aa7427657d6286f8a1b77eb7e63c6" }
+shulkerscript = { git = "https://github.com/moritz-hoelting/shulkerscript-lang.git", features = ["fs_access", "shulkerbox"], default-features = false, rev = "a3e0bd95bc35f2c880ca73e2bfebad95bb937254" }
+thiserror = "1.0.63"
+toml = "0.8.19"
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
