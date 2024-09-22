@@ -20,15 +20,20 @@ where
     }
     .ancestors()
     .find(|p| p.join("pack.toml").exists())
-    .map(|p| relativize(p).unwrap_or_else(|| p.to_path_buf()))
+    .map(|p| p.relativize().unwrap_or_else(|| p.to_path_buf()))
 }
 
-pub fn relativize<P>(path: P) -> Option<PathBuf>
+pub trait Relativize {
+    fn relativize(&self) -> Option<PathBuf>;
+}
+impl<P> Relativize for P
 where
     P: AsRef<Path>,
 {
-    let cwd = env::current_dir().ok()?;
-    pathdiff::diff_paths(path, cwd)
+    fn relativize(&self) -> Option<PathBuf> {
+        let cwd = env::current_dir().ok()?;
+        pathdiff::diff_paths(self, cwd)
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
