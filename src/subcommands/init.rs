@@ -10,6 +10,7 @@ use clap::ValueEnum;
 use git2::{
     IndexAddOption as GitIndexAddOption, Repository as GitRepository, Signature as GitSignature,
 };
+use inquire::validator::Validation;
 use path_absolutize::Absolutize;
 
 use crate::{
@@ -228,6 +229,11 @@ fn initialize_interactive(args: &InitArgs) -> Result<()> {
         match inquire::Text::new("Enter the pack format:")
             .with_help_message("This will determine the Minecraft version compatible with your pack, find more on the Minecraft wiki")
             .with_default(PackConfig::DEFAULT_PACK_FORMAT.to_string().as_str())
+            .with_validator(|v: &str| Ok(
+                v.parse::<u8>()
+                .map(|_| Validation::Valid)
+                .unwrap_or(Validation::Invalid(
+                    inquire::validator::ErrorMessage::Custom("Invalid pack format".to_string())))))
             .prompt() {
                 Ok(res) => res.parse().ok(),
                 Err(_) => {
@@ -270,8 +276,21 @@ fn initialize_interactive(args: &InitArgs) -> Result<()> {
                 "This will be the icon of your datapack, visible in the datapack selection screen [use \"-\" for default]",
             )
             .with_autocomplete(autocompleter)
+            .with_validator(|s: &str| {
+                if s == "-" {
+                    Ok(Validation::Valid)
+                } else {
+                    let path = Path::new(s);
+                    if path.exists() && path.is_file() && path.extension().is_some_and(|ext| ext == "png") {
+                        Ok(Validation::Valid)
+                    } else {
+                        Ok(Validation::Invalid(
+                            inquire::validator::ErrorMessage::Custom("Invalid file path. Path must exist and point to a png".to_string()),
+                        ))
+                    }
+                }
+            })
             .with_default("-")
-            // .with_autocomplete()
             .prompt()
         {
             Ok(res) if &res == "-" => None,

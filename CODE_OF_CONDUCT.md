@@ -1,4 +1,4 @@
-# Code of Conduct - ShulkerScript CLI
+# Code of Conduct - Shulkerscript CLI
 
 ## Our Pledge
 

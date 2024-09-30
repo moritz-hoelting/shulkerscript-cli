@@ -4,11 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 authors = ["Moritz Hölting <moritz@hoelting.dev>"]
-categories = ["command-line-utilities", "compilers"]
-description = "Command line tool to compile ShulkerScript projects"
+description = "Command line tool to compile Shulkerscript projects"
+categories = ["command-line-utilities", "compilers", "game-development"]
+keywords = ["minecraft", "datapack", "mcfunction"]
 repository = "https://github.com/moritz-hoelting/shulkerscript-cli"
+homepage = "https://shulkerscript.hoelting.dev/"
 readme = "README.md"
-license = "MIT"
+license = "MIT OR Apache-2.0"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -22,7 +25,7 @@ lang-debug = []
 lua = ["shulkerscript/lua"]
 migrate = ["dep:indoc", "dep:serde_json", "dep:walkdir"]
 watch = ["dep:notify-debouncer-mini", "dep:ctrlc"]
-zip = ["shulkerbox/zip"]
+zip = ["shulkerscript/zip"]
 
 [dependencies]
 anyhow = "1.0.89"
@@ -34,15 +37,13 @@ dotenvy = "0.15.7"
 git2 = { version = "0.19.0", default-features = false }
 human-panic = "2.0.1"
 indoc = { version = "2.0.5", optional = true }
-# waiting for pull request to be merged
-inquire = { git = "https://github.com/moritz-hoelting/rust-inquire.git", branch = "main", package = "inquire" }
+inquire = "0.7.5"
 notify-debouncer-mini = { version = "0.4.1", default-features = false, optional = true }
 path-absolutize = "3.1.1"
 pathdiff = "0.2.1"
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = { version = "1.0.128", optional = true }
-shulkerbox = { git = "https://github.com/moritz-hoelting/shulkerbox.git", default-features = false, rev = "60458e6b2d719278c4fe090cb2759e123a3f86d2" }
-shulkerscript = { git = "https://github.com/moritz-hoelting/shulkerscript-lang.git", features = ["fs_access", "shulkerbox"], default-features = false, rev = "c1a8bc8577c9ef8abff79734ebd5524a4f93afa7" }
+shulkerscript = { git = "https://github.com/moritz-hoelting/shulkerscript-lang.git", features = ["fs_access", "shulkerbox", "zip"], default-features = false, rev = "a9a8aff13b0ad0986ee1bdf3d44b74676385dfcd" }
 thiserror = "1.0.63"
 toml = "0.8.19"
 tracing = "0.1.40"
