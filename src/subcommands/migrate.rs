@@ -1,6 +1,6 @@
 use anyhow::Result;
 use path_absolutize::Absolutize as _;
-use shulkerbox::virtual_fs::{VFile, VFolder};
+use shulkerscript::shulkerbox::virtual_fs::{VFile, VFolder};
 use std::{
     borrow::Cow,
     fs::{self, File},
@@ -20,7 +20,7 @@ pub struct MigrateArgs {
     /// The path of the project to migrate.
     #[arg(default_value = ".")]
     pub path: PathBuf,
-    /// The path of the folder to create the ShulkerScript project.
+    /// The path of the folder to create the Shulkerscript project.
     pub target: PathBuf,
     /// Force migration even if some features will be lost.
     #[arg(short, long)]
@@ -49,7 +49,7 @@ pub fn migrate(args: &MigrateArgs) -> Result<()> {
             serde_json::from_reader(BufReader::new(fs::File::open(&mcmeta_path)?))?;
 
         if !args.force && !is_mcmeta_compatible(&mcmeta) {
-            print_error("Your datapack uses features in the pack.mcmeta file that are not yet supported by ShulkerScript.");
+            print_error("Your datapack uses features in the pack.mcmeta file that are not yet supported by Shulkerscript.");
             print_error(
                 r#""features", "filter", "overlays" and "language" will get lost if you continue."#,
             );
@@ -76,6 +76,11 @@ pub fn migrate(args: &MigrateArgs) -> Result<()> {
         }
 
         root.place(&args.target)?;
+
+        let logo_path = base_path.join("pack.png");
+        if logo_path.exists() {
+            fs::copy(logo_path, args.target.join("pack.png"))?;
+        }
 
         print_success("Migration successful.");
         Ok(())
@@ -269,7 +274,7 @@ fn handle_function(
 
     // generate the full content of the function file
     let full_content = indoc::formatdoc!(
-        r#"// This file was automatically migrated by ShulkerScript CLI v{version} from file "{function}"
+        r#"// This file was automatically migrated by Shulkerscript CLI v{version} from file "{function}"
         namespace "{namespace_name}";
 
         #[deobfuscate = "{function_path}"]
@@ -338,7 +343,7 @@ fn handle_tag(
             .join(",\n");
 
         let generated = indoc::formatdoc!(
-            r#"// This file was automatically migrated by ShulkerScript CLI v{version} from file "{tag}"
+            r#"// This file was automatically migrated by Shulkerscript CLI v{version} from file "{tag}"
             namespace "{namespace}";
 
             tag "{tag_path}"{of_type}{replace} [

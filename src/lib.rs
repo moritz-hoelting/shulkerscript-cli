@@ -1,4 +1,4 @@
-//! This crate is the cli app of the ShulkerScript language for creating Minecraft datapacks.
+//! This crate is the cli app of the Shulkerscript language for creating Minecraft datapacks.
 //!
 //! # Installation
 //! ```bash

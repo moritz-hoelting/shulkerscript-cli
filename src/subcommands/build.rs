@@ -1,10 +1,12 @@
 use anyhow::Result;
 use path_absolutize::Absolutize;
-use shulkerbox::{
-    util::compile::CompileOptions,
-    virtual_fs::{VFile, VFolder},
+use shulkerscript::{
+    base::{FsProvider, PrintHandler},
+    shulkerbox::{
+        util::compile::CompileOptions,
+        virtual_fs::{VFile, VFolder},
+    },
 };
-use shulkerscript::base::{FsProvider, PrintHandler};
 
 use crate::{
     config::ProjectConfig,
@@ -191,7 +193,7 @@ fn _get_script_paths(path: &Path, prefix: &str) -> std::io::Result<Vec<(String, 
                     prefix.to_string()
                         + path
                             .file_stem()
-                            .expect("ShulkerScript files are not allowed to have empty names")
+                            .expect("Shulkerscript files are not allowed to have empty names")
                             .to_str()
                             .expect("Invalid characters in filename"),
                     path,

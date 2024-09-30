@@ -38,13 +38,13 @@ pub enum Command {
     /// Build the project.
     Build(BuildArgs),
     /// Clean build artifacts.
-    /// This will remove the `dist` directory.
+    /// This will remove the output directory.
     Clean(CleanArgs),
     #[cfg(feature = "lang-debug")]
     /// Build the project and dump the intermediate state.
     LangDebug(subcommands::LangDebugArgs),
     #[cfg(feature = "migrate")]
-    /// Migrate a regular datapack to a ShulkerScript project.
+    /// Migrate a regular datapack to a Shulkerscript project.
     Migrate(subcommands::MigrateArgs),
     #[cfg(feature = "watch")]
     /// Watch for changes and execute commands.

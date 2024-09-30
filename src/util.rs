@@ -140,7 +140,7 @@ impl Autocomplete for PathAutocomplete {
         } else if let Some(first) = self
             .get_cached(parent)?
             .iter()
-            .find(|entry| entry.starts_with(current))
+            .find(|entry| current.is_empty() || entry.starts_with(current))
         {
             let completion = format!("{parent}/{first}");
             self.update_input(&completion)?;
