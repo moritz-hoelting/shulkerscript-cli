@@ -3,11 +3,29 @@
 This is a cli tool for the shulkerscript language. It can be used to initialize a new project, and to compile and package a project.
 
 ## Installation
-```bash	
-cargo install --git https://github.com/moritz-hoelting/shulkerscript-cli.git
+
+### From release (Windows)
+```powershell
+iex (iwr "https://raw.githubusercontent.com/moritz-hoelting/shulkerscript-cli/main/install.ps1").Content
 ```
 
+### From release (Linux / macOS)
+```bash
+curl -sfSL https://raw.githubusercontent.com/moritz-hoelting/shulkerscript-cli/main/install.sh | bash
+```
+
+### From source
+```bash	
+cargo install shulkerscript-cli
+```
+
+## VS Code Extension
+
+A VS Code extension is available [here](https://marketplace.visualstudio.com/items?itemName=moritz-hoelting.shulkerscript-lang) to provide syntax highlighting and snippets for Shulkerscript files.
+
 ## Usage
+
+Read the [documentation](https://shulkerscript.hoelting.dev) for more information on the language and cli.
 
 ### Initialize a new project
 ```bash
