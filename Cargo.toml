@@ -43,7 +43,7 @@ path-absolutize = "3.1.1"
 pathdiff = "0.2.1"
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = { version = "1.0.128", optional = true }
-shulkerscript = { git = "https://github.com/moritz-hoelting/shulkerscript-lang.git", features = ["fs_access", "shulkerbox", "zip"], default-features = false, rev = "a9a8aff13b0ad0986ee1bdf3d44b74676385dfcd" }
+shulkerscript = { version = "0.1.0", features = ["fs_access", "shulkerbox", "zip"], default-features = false }
 thiserror = "1.0.63"
 toml = "0.8.19"
 tracing = "0.1.40"

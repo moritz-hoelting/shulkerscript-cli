@@ -1171,7 +1171,8 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 [[package]]
 name = "shulkerbox"
 version = "0.1.0"
-source = "git+https://github.com/moritz-hoelting/shulkerbox?rev=6e956fbe7438158c6a29c1a92d057f0f3093405a#6e956fbe7438158c6a29c1a92d057f0f3093405a"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "18704338e25effa7d02ab8d83c453814a54163b66464693bb4aac0012f05db8b"
 dependencies = [
  "chksum-md5",
  "getset",
@@ -1183,7 +1184,8 @@ dependencies = [
 [[package]]
 name = "shulkerscript"
 version = "0.1.0"
-source = "git+https://github.com/moritz-hoelting/shulkerscript-lang.git?rev=a9a8aff13b0ad0986ee1bdf3d44b74676385dfcd#a9a8aff13b0ad0986ee1bdf3d44b74676385dfcd"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1546b5164f154cb0ecb5b676d0f1beeb46b9417b785b2bc43b8e2d07caab01eb"
 dependencies = [
  "chksum-md5",
  "colored",

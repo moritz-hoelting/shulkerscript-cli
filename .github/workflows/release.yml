@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Building ${{ matrix.platform.os_name }}
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - os_name: Linux-x86_64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - os_name: Linux-aarch64
+            os: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+          - os_name: Linux-arm
+            os: ubuntu-latest
+            target: arm-unknown-linux-musleabi
+          - os_name: Linux-i686
+            os: ubuntu-latest
+            target: i686-unknown-linux-musl
+          - os_name: Windows-aarch64
+            os: windows-latest
+            target: aarch64-pc-windows-msvc
+          - os_name: Windows-i686
+            os: windows-latest
+            target: i686-pc-windows-msvc
+          - os_name: Windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os_name: macOS-x86_64
+            os: macOS-latest
+            target: x86_64-apple-darwin
+          - os_name: macOS-aarch64
+            os: macOS-latest
+            target: aarch64-apple-darwin
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache cargo & target directories
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: "release"
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: "build"
+          target: ${{ matrix.platform.target }}
+          toolchain: stable
+          args:
+            "--locked --release"
+          strip: true
+      - name: Package as .tar.gz (Linux)
+        if: ${{ contains(matrix.platform.os, 'ubuntu') }}
+        run: |
+          mv target/${{ matrix.platform.target }}/release/shulkerscript ./shulkerscript
+          tar -czvf shulkerscript-${{ matrix.platform.target }}.tar.gz shulkerscript
+          echo UPLOAD_FILE=shulkerscript-${{ matrix.platform.target }}.tar.gz >> $GITHUB_ENV
+      - name: Package as .zip (Windows)
+        if: ${{ contains(matrix.platform.os, 'windows') }}
+        shell: bash
+        run: |
+          mv target/${{ matrix.platform.target }}/release/shulkerscript.exe ./shulkerscript.exe
+          pwsh -command ". 'Compress-Archive' shulkerscript.exe shulkerscript-${{ matrix.platform.target }}.zip"
+          echo UPLOAD_FILE=shulkerscript-${{ matrix.platform.target }}.zip >> $GITHUB_ENV
+      - name: Package as .zip (macOS)
+        if: ${{ contains(matrix.platform.os, 'macOS') }}
+        run: |
+          mv target/${{ matrix.platform.target }}/release/shulkerscript ./shulkerscript
+          zip shulkerscript-${{ matrix.platform.target }}.zip shulkerscript
+          echo UPLOAD_FILE=shulkerscript-${{ matrix.platform.target }}.zip >> $GITHUB_ENV
+      - name: Upload artifact to release
+        shell: bash
+        run: gh release upload ${{ github.event.release.tag_name }} $UPLOAD_FILE
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
