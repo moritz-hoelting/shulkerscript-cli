@@ -8,6 +8,7 @@ $REPO = "moritz-hoelting/shulkerscript-cli"
 $PROGRAM_DISPLAY_NAME = "Shulkerscript CLI"
 $LATEST_RELEASE_URL = "https://api.github.com/repos/$REPO/releases/latest"
 $BIN_NAME = "shulkerscript"
+$CRATE_NAME = "shulkerscript-cli"
 $INSTALL_PATH = Join-Path $env:USERPROFILE "AppData\Local\Programs\$BIN_NAME"
 $PATH_REGISTRY = "Registry::HKEY_CURRENT_USER\Environment"
 
@@ -28,7 +29,7 @@ if ($ARCH -eq 'AMD64') {
     $ARCH = 'i686'
 } else {
     Write-Host "Unsupported architecture: $ARCH" -ForegroundColor Red
-    exit 1
+    return "Error"
 }
 
 # Fetch the latest release data from GitHub
@@ -37,7 +38,7 @@ try {
 }
 catch {
     Write-Host "Failed to fetch latest release data." -ForegroundColor Red
-    exit 1
+    return "Error"
 }
 
 # Get the latest version number
@@ -52,7 +53,7 @@ if (Get-Command $BIN_NAME -ErrorAction Ignore) {
 
     if ($INSTALLED_VERSION -eq $CLEAN_LATEST_VERSION) {
         Write-Host "$PROGRAM_DISPLAY_NAME is already up to date."
-        exit 0
+        return
     }
     else {
         Write-Host "A new version is available. Upgrading..."
@@ -66,9 +67,9 @@ else {
 # Use cargo-binstall if available
 if (Get-Command cargo-binstall -ErrorAction SilentlyContinue) {
     Write-Host "cargo-binstall is available. Installing/upgrading using cargo-binstall..."
-    cargo-binstall --git "https://github.com/$REPO" --force --locked --no-confirm $BIN_NAME
+    cargo-binstall --git "https://github.com/$REPO" --force --locked --no-confirm $CRATE_NAME
     Remove-Old-Version
-    exit 0
+    return
 }
 
 # Get the download url of the latest release
@@ -78,13 +79,13 @@ if ([string]::IsNullOrEmpty($DOWNLOAD_URL)) {
     # if there is no prebuilt binary, try to build from source
     if (Get-Command cargo -ErrorAction SilentlyContinue) {
         Write-Host "No prebuilt binary available for your platform. Building from source..."
-        cargo install --git "https://github.com/$REPO" --force --locked
+        cargo install --force --locked $CRATE_NAME
         Remove-Old-Version
-        exit 0
+        return
     }
     else {
         Write-Host "No prebuilt binary available for your platform. Please install Rust and Cargo using https://rustup.rs and try again."
-        exit 1
+        return "Error"
     }
 }
 
