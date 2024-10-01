@@ -8,6 +8,7 @@ REPO="moritz-hoelting/shulkerscript-cli"
 PROGRAM_DISPLAY_NAME="Shulkerscript CLI"
 LATEST_RELEASE_URL="https://api.github.com/repos/$REPO/releases/latest"
 BIN_NAME="shulkerscript"
+CRATE_NAME="shulkerscript-cli"
 INSTALL_PATH="$HOME/bin/$BIN_NAME"
 
 function removeOldVersion() {
@@ -48,7 +49,7 @@ fi
 # Use cargo-binstall if available
 if which cargo-binstall &> /dev/null; then
     echo "Found cargo-binstall. Installing/upgrading using cargo-binstall..."
-    cargo-binstall --git "https://github.com/$REPO" --force --locked --no-confirm $BIN_NAME
+    cargo-binstall --git "https://github.com/$REPO" --force --locked --no-confirm $CRATE_NAME
     
     # Remove old version
     removeOldVersion
@@ -62,7 +63,7 @@ if [ -z "$DOWNLOAD_URL" ]; then
     # if there is no prebuilt binary, try to build from source
     if which cargo &> /dev/null; then
         echo "No prebuilt binary available for your platform. Building from source..."
-        cargo install --git "https://github.com/$REPO" --force --locked
+        cargo install --force --locked $CRATE_NAME
         removeOldVersion
         exit 0
     else
