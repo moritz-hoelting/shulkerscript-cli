@@ -13,7 +13,7 @@ static VERSION: &str = formatcp!(
 );
 
 #[derive(Debug, Clone, Parser)]
-#[command(version, about, long_about = None, disable_version_flag = false, version = VERSION)]
+#[command(name = "shulkerscript", about, version = VERSION, long_about = None, disable_version_flag = false)]
 pub struct Args {
     #[command(subcommand)]
     cmd: Command,

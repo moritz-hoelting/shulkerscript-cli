@@ -37,7 +37,7 @@ pub struct BuildArgs {
     #[arg(short, long)]
     pub assets: Option<PathBuf>,
     /// Package the project to a zip file.
-    #[arg(short, long)]
+    #[cfg_attr(not(feature = "zip"), doc = "Disabled because not compiled with `zip` feature")]
     pub zip: bool,
     /// Skip validating the project for pack format compatibility.
     #[arg(long)]
