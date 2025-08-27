@@ -59,7 +59,7 @@ pub fn clean(args: &CleanArgs) -> Result<()> {
     for delete_path in delete_paths {
         if delete_path.exists() {
             if verbose {
-                print_info(&format!("Deleting {:?}", delete_path));
+                print_info(format!("Deleting {:?}", delete_path));
             }
             if delete_path.is_file() {
                 std::fs::remove_file(&delete_path)?;

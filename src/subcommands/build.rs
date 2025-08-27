@@ -12,7 +12,7 @@ use crate::{
     config::ProjectConfig,
     error::Error,
     terminal_output::{print_error, print_info, print_success, print_warning},
-    util,
+    util::{self, get_project_main_namespace},
 };
 use std::{
     borrow::Cow,
@@ -37,22 +37,19 @@ pub struct BuildArgs {
     #[arg(short, long)]
     pub assets: Option<PathBuf>,
     /// Package the project to a zip file.
-    #[cfg_attr(not(feature = "zip"), doc = "Disabled because not compiled with `zip` feature")]
+    #[cfg(feature = "zip")]
+    #[arg(short, long)]
     pub zip: bool,
     /// Skip validating the project for pack format compatibility.
     #[arg(long)]
     pub no_validate: bool,
     /// Check if the project can be built without actually building it.
-    #[arg(long, conflicts_with_all = ["output", "zip"])]
+    #[arg(long, conflicts_with = "output")]
+    #[cfg_attr(feature = "zip", arg(conflicts_with = "zip"))]
     pub check: bool,
 }
 
 pub fn build(args: &BuildArgs) -> Result<()> {
-    if args.zip && !cfg!(feature = "zip") {
-        print_error("The zip feature is not enabled. Please install with the `zip` feature enabled to use the `--zip` option.");
-        return Err(Error::FeatureNotEnabledError("zip".to_string()).into());
-    }
-
     let path = util::get_project_path(&args.path).unwrap_or(args.path.clone());
     let dist_path = args
         .output
@@ -60,7 +57,16 @@ pub fn build(args: &BuildArgs) -> Result<()> {
         .map(Cow::Borrowed)
         .unwrap_or_else(|| Cow::Owned(path.join("dist")));
 
-    let and_package_msg = if args.zip { " and packaging" } else { "" };
+    let zip = {
+        #[cfg(feature = "zip")]
+        {
+            args.zip
+        }
+        #[cfg(not(feature = "zip"))]
+        false
+    };
+
+    let and_package_msg = if zip { " and packaging" } else { "" };
 
     let mut path_display = format!("{}", path.display());
     if path_display.is_empty() {
@@ -83,6 +89,12 @@ pub fn build(args: &BuildArgs) -> Result<()> {
     let datapack = shulkerscript::transpile(
         &PrintHandler::new(),
         &FsProvider::default(),
+        &get_project_main_namespace(&project_config).map_err(|namespace| {
+            print_error(format!(
+                "The automatically generated namespace is too short: '{namespace}'. Please specify a namespace in the pack.toml file.",
+            ));
+            Error::InvalidNamespaceError(namespace)
+        })?,
         project_config.pack.pack_format,
         &script_paths,
     )?;
@@ -133,7 +145,7 @@ pub fn build(args: &BuildArgs) -> Result<()> {
         compiled
     };
 
-    let dist_extension = if args.zip { ".zip" } else { "" };
+    let dist_extension = if zip { ".zip" } else { "" };
 
     let dist_path = dist_path.join(project_config.pack.name + dist_extension);
 

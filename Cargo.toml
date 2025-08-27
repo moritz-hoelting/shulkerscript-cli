@@ -28,24 +28,25 @@ watch = ["dep:notify-debouncer-mini", "dep:ctrlc"]
 zip = ["shulkerscript/zip"]
 
 [dependencies]
-anyhow = "1.0.89"
-clap = { version = "4.5.18", features = ["deprecated", "derive", "env"] }
-colored = "2.1.0"
-const_format = "0.2.33"
+anyhow = "1.0.95"
+clap = { version = "4.5.32", features = ["deprecated", "derive", "env"] }
+colored = "3.0.0"
+const_format = "0.2.34"
 ctrlc = { version = "3.4.5", optional = true }
 dotenvy = "0.15.7"
-git2 = { version = "0.19.0", default-features = false }
-human-panic = "2.0.1"
+git2 = { version = "0.20.0", default-features = false }
+human-panic = "2.0.2"
 indoc = { version = "2.0.5", optional = true }
 inquire = "0.7.5"
-notify-debouncer-mini = { version = "0.4.1", default-features = false, optional = true }
+notify-debouncer-mini = { version = "0.7.0", default-features = false, optional = true }
 path-absolutize = "3.1.1"
-pathdiff = "0.2.1"
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = { version = "1.0.128", optional = true }
-shulkerscript = { version = "0.1.0", features = ["fs_access", "shulkerbox", "zip"], default-features = false }
-thiserror = "1.0.63"
-toml = "0.8.19"
-tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
+pathdiff = "0.2.3"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = { version = "1.0.138", optional = true }
+# shulkerscript = { version = "0.1.0", features = ["fs_access", "shulkerbox"], default-features = false }
+shulkerscript = { git = "https://github.com/moritz-hoelting/shulkerscript-lang", features = ["fs_access", "shulkerbox"], default-features = false, rev = "1ed2919ab0375e625f55997e8ad3505b2137efb0" }
+thiserror = "2.0.11"
+toml = "0.9.5"
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
 walkdir = { version = "2.5.0", optional = true }

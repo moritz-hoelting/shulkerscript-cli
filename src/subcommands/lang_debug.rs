@@ -26,6 +26,7 @@ pub enum DumpState {
     Tokens,
     #[default]
     Ast,
+    #[value(alias = "dp")]
     Datapack,
 }
 
@@ -71,6 +72,7 @@ pub fn lang_debug(args: &LangDebugArgs) -> Result<()> {
             let datapack = shulkerscript::transpile(
                 &PrintHandler::new(),
                 &file_provider,
+                "main_namespace",
                 PackConfig::DEFAULT_PACK_FORMAT,
                 &program_paths,
             )?;

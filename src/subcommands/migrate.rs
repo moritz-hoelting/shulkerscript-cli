@@ -106,7 +106,7 @@ struct McMetaPack {
 }
 
 fn is_mcmeta_compatible(mcmeta: &serde_json::Value) -> bool {
-    mcmeta.as_object().map_or(false, |mcmeta| {
+    mcmeta.as_object().is_some_and(|mcmeta| {
         mcmeta.len() == 1
             && mcmeta.contains_key("pack")
             && mcmeta["pack"]
@@ -136,9 +136,8 @@ fn generate_pack_toml(base_path: &Path, mcmeta: &McMeta) -> Result<VFile> {
                                 }
                             })
                         })
-                        .map_err(|e| {
+                        .inspect_err(|_| {
                             err = true;
-                            e
                         })
                         .unwrap_or_default()
             } else {
@@ -268,7 +267,7 @@ fn handle_function(
 
     let function_name = function_path
         .split('/')
-        .last()
+        .next_back()
         .expect("split always returns at least one element")
         .replace(|c: char| !c.is_ascii_alphanumeric(), "_");
 

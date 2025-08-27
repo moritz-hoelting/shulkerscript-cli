@@ -13,8 +13,8 @@ static VERSION: &str = formatcp!(
 );
 
 #[derive(Debug, Clone, Parser)]
-#[command(name = "shulkerscript", about, version = VERSION, long_about = None, disable_version_flag = false)]
-pub struct Args {
+#[command(name = "shulkerscript", version = VERSION, about, long_about = None)]
+pub struct Cli {
     #[command(subcommand)]
     cmd: Command,
     /// Enable tracing output
@@ -61,7 +61,7 @@ pub enum TracingLevel {
     Error,
 }
 
-impl Args {
+impl Cli {
     pub fn run(&self) -> Result<()> {
         if let Some(level) = self.trace {
             setup_tracing(level)?;
@@ -123,6 +123,6 @@ mod tests {
 
     #[test]
     fn verify_cli() {
-        Args::command().debug_assert();
+        Cli::command().debug_assert();
     }
 }

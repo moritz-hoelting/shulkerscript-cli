@@ -11,7 +11,7 @@ use colored::Colorize;
 use notify_debouncer_mini::{new_debouncer, notify::*, DebounceEventResult};
 
 use crate::{
-    cli::Args,
+    cli::Cli,
     error::Result,
     terminal_output::{print_error, print_info, print_warning},
     util,
@@ -74,7 +74,7 @@ pub fn watch(args: &WatchArgs) -> Result<()> {
             let prog_name = std::env::args()
                 .next()
                 .unwrap_or(env!("CARGO_PKG_NAME").to_string());
-            Args::parse_from(iter::once(prog_name.as_str()).chain(split.clone()))
+            Cli::parse_from(iter::once(prog_name.as_str()).chain(split.clone()))
         })
         .collect::<Vec<_>>();
 
@@ -168,7 +168,7 @@ pub fn watch(args: &WatchArgs) -> Result<()> {
     }
 }
 
-fn run_cmds(cmds: &[Args], no_execute: bool, shell_cmds: &[String], initial: bool) {
+fn run_cmds(cmds: &[Cli], no_execute: bool, shell_cmds: &[String], initial: bool) {
     if initial {
         print_info("Running commands initially...");
     } else {

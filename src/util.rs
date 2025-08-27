@@ -8,6 +8,8 @@ use std::{
 use inquire::{autocompletion::Replacement, Autocomplete};
 use path_absolutize::Absolutize;
 
+use crate::config::ProjectConfig;
+
 pub fn get_project_path<P>(base_path: P) -> Option<PathBuf>
 where
     P: AsRef<Path>,
@@ -21,6 +23,31 @@ where
     .ancestors()
     .find(|p| p.join("pack.toml").exists())
     .map(|p| p.relativize().unwrap_or_else(|| p.to_path_buf()))
+}
+
+pub fn get_project_main_namespace(project_config: &ProjectConfig) -> Result<String, String> {
+    project_config
+        .pack
+        .main_namespace
+        .as_ref()
+        .cloned()
+        .map_or_else(
+            || {
+                let namespace = project_config
+                    .pack
+                    .name
+                    .to_lowercase()
+                    .chars()
+                    .filter(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.'))
+                    .collect::<String>();
+                if namespace.len() < 5 {
+                    Err(namespace)
+                } else {
+                    Ok(namespace)
+                }
+            },
+            Ok,
+        )
 }
 
 pub trait Relativize {

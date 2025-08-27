@@ -13,6 +13,8 @@ pub struct ProjectConfig {
 pub struct PackConfig {
     pub name: String,
     pub description: String,
+    #[serde(alias = "main-namespace")]
+    pub main_namespace: Option<String>,
     #[serde(rename = "format", alias = "pack_format")]
     pub pack_format: u8,
     pub version: String,
@@ -29,6 +31,7 @@ impl Default for PackConfig {
         Self {
             name: Self::DEFAULT_NAME.to_string(),
             description: Self::DEFAULT_DESCRIPTION.to_string(),
+            main_namespace: None,
             pack_format: Self::DEFAULT_PACK_FORMAT,
             version: "0.1.0".to_string(),
         }
